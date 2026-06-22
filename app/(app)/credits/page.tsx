@@ -2,7 +2,8 @@ import { listCredits } from "@/lib/queries/credits";
 import { getCurrentCycle } from "@/lib/queries/cycles";
 import { CreditForm } from "@/components/quick-log/CreditForm";
 import { Card } from "@/components/ui/Card";
-import { formatINR } from "@/lib/utils/currency";
+import { DisplayHeading } from "@/components/ui/DisplayHeading";
+import { AmountText } from "@/components/ui/AmountText";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
 import type { Credit } from "@/lib/types";
 
@@ -19,7 +20,7 @@ export default async function CreditsPage() {
 
   return (
     <div className="pt-4">
-      <h1 className="font-display text-3xl text-ink">Credits</h1>
+      <DisplayHeading muted="Log your" bold="Credits" />
 
       {/* Current cycle definition. */}
       <Card className="mt-4">
@@ -84,9 +85,7 @@ function CreditList({
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-3 text-right">
-            <p className="font-mono text-ink tabular-nums">
-              {formatINR(c.amount)}
-            </p>
+            <AmountText amount={c.amount} size="md" />
             {showAnchor && (
               <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] uppercase tracking-wide text-ink">
                 Anchor

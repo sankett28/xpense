@@ -25,16 +25,20 @@ begin
   on conflict (id) do nothing;
 
   -- 2) Seed the 8 default categories ONLY if the user has none yet.
+  --    `color` stores a PALETTE TOKEN NAME (not a hex) so globals.css stays the
+  --    single source of truth for what each color looks like. The app maps the
+  --    token to its CSS variable. Valid tokens: bg, surface, surface-2, ink,
+  --    ink-soft, accent, alert, dark, on-dark.
   if not exists (select 1 from categories where user_id = p_user_id) then
     insert into categories (user_id, name, icon, color, sort_order) values
-      (p_user_id, 'Food',        'utensils-crossed', '#D26B4E', 0),
-      (p_user_id, 'Transport',   'car',              '#3E4634', 1),
-      (p_user_id, 'Shopping',    'shopping-bag',     '#A6AC92', 2),
-      (p_user_id, 'Bills',       'receipt',          '#C8C8B2', 3),
-      (p_user_id, 'Health',      'heart-pulse',      '#E3C13D', 4),
-      (p_user_id, 'Investments', 'trending-up',      '#1E2318', 5),
-      (p_user_id, 'Education',   'graduation-cap',   '#8A9270', 6),
-      (p_user_id, 'Misc',        'shapes',           '#DAD9C6', 7);
+      (p_user_id, 'Food',        'utensils-crossed', 'alert',     0),
+      (p_user_id, 'Transport',   'car',              'dark',      1),
+      (p_user_id, 'Shopping',    'shopping-bag',     'surface-2', 2),
+      (p_user_id, 'Bills',       'receipt',          'ink-soft',  3),
+      (p_user_id, 'Health',      'heart-pulse',      'accent',    4),
+      (p_user_id, 'Investments', 'trending-up',      'ink',       5),
+      (p_user_id, 'Education',   'graduation-cap',   'bg',        6),
+      (p_user_id, 'Misc',        'shapes',           'dark',      7);
   end if;
 end;
 $$;

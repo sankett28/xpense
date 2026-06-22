@@ -4,15 +4,17 @@ import { listItems } from "@/lib/queries/items";
 import { listCategories } from "@/lib/queries/categories";
 import { listRecentTransactions } from "@/lib/queries/transactions";
 import { QuickLog } from "@/components/quick-log/QuickLog";
-import { Card } from "@/components/ui/Card";
+import { Hero } from "@/components/ui/Hero";
+import { StatRow } from "@/components/ui/StatRow";
+import { FullBleed } from "@/components/ui/FullBleed";
+import { ColorBlock } from "@/components/ui/ColorBlock";
+import { DisplayHeading } from "@/components/ui/DisplayHeading";
 import { TransactionRow } from "@/components/ui/TransactionRow";
 import { Button } from "@/components/ui/Button";
-import { formatINR } from "@/lib/utils/currency";
 import { formatDateRange } from "@/lib/utils/date";
 
-// Home is the logging hub: hero (available balance for the active cycle) +
-// quick-log strip + recent transactions. Server Component; data is fetched per
-// request and revalidated after each logExpense/logCredit mutation.
+// Home is the logging hub: hero (available balance) + budget/left stats +
+// quick-log strip + recent transactions. Follows docs/design-system.md.
 export default async function HomePage() {
   const cycle = await getCurrentCycle();
   const [items, categories, recent] = await Promise.all([
@@ -27,73 +29,81 @@ export default async function HomePage() {
   const itemIcon = new Map(items.map((i) => [i.id, i.icon]));
   const categoryName = new Map(categories.map((c) => [c.id, c.name]));
   const categoryIcon = new Map(categories.map((c) => [c.id, c.icon]));
+  const categoryColor = new Map(categories.map((c) => [c.id, c.color]));
+
+  // Label like "AVAILABLE JUNE BUDGET" from the cycle start month.
+  const monthLabel = cycle
+    ? new Date(cycle.start + "T00:00:00").toLocaleString("en-IN", {
+        month: "long",
+      })
+    : "";
+
+  const overrun = totals != null && totals.available < 0;
 
   return (
     <div className="pt-4">
-      {/* Hero: available balance for the current cycle. */}
       {cycle && totals ? (
-        <Card className="relative overflow-hidden">
-          <div className="tick-motif pointer-events-none absolute inset-0" />
-          <div className="relative">
-            <span className="label-caps">Available this cycle</span>
-            <div
-              className={[
-                "font-mono text-5xl tabular-nums",
-                totals.available < 0 ? "text-alert" : "text-ink",
-              ].join(" ")}
-            >
-              {formatINR(totals.available)}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-ink-soft">
-              <span>
-                Credited{" "}
-                <span className="font-mono text-ink">
-                  {formatINR(totals.totalCredited)}
-                </span>
-              </span>
-              <span>
-                Spent{" "}
-                <span className="font-mono text-ink">
-                  {formatINR(totals.totalSpent)}
-                </span>
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-ink-soft">
-              Current cycle: {formatDateRange(cycle.start, cycle.end)} · Day{" "}
-              {cycle.dayNumber}
-            </p>
+        <>
+          {/* Hero: available balance for the current cycle. */}
+          <Hero
+            label={`Available ${monthLabel} budget`}
+            amount={totals.available}
+            tone="auto"
+          />
+
+          {/* Budget / Left stat rows with the tick motif. */}
+          <div className="mt-6 flex flex-col gap-4">
+            <StatRow label="Budget" amount={totals.totalCredited} ticks />
+            <StatRow
+              label="Left"
+              amount={totals.available}
+              tone="auto"
+              ticks
+            />
           </div>
-        </Card>
+
+          <p className="mt-4 text-sm text-ink-soft">
+            Current cycle: {formatDateRange(cycle.start, cycle.end)} · Day{" "}
+            {cycle.dayNumber}
+          </p>
+
+          {/* Overrun banner (full-bleed terracotta) only when over budget. */}
+          {overrun && (
+            <FullBleed className="mt-6">
+              <ColorBlock
+                variant="alert"
+                label="⚠ Budget overrun"
+                amount={totals.totalSpent}
+              />
+            </FullBleed>
+          )}
+        </>
       ) : (
         // Edge case: no salary logged yet. Prompt instead of showing zero.
-        <Card>
-          <span className="label-caps">No active cycle</span>
-          <p className="mt-1 font-display text-2xl text-ink">
-            Log your salary to start a budget cycle
+        <div className="pt-2">
+          <DisplayHeading muted="Log your" bold="Salary" />
+          <p className="mt-3 text-sm text-ink-soft">
+            Your budgeting period is anchored to your salary credit date. Log a
+            salary to start a cycle.
           </p>
-          <p className="mt-1 text-sm text-ink-soft">
-            Your budgeting period is anchored to your salary credit date.
-          </p>
-          <Link href="/credits" className="mt-4 inline-block">
+          <Link href="/credits" className="mt-5 inline-block">
             <Button variant="primary">Log salary</Button>
           </Link>
-        </Card>
+        </div>
       )}
 
       {/* Quick-log strip. */}
       <QuickLog items={items} categories={categories} />
 
       {/* Recent transactions. */}
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="label-caps">Recent</span>
-        </div>
+      <section className="mt-10">
+        <span className="label-caps">Recent</span>
         {recent.length === 0 ? (
-          <p className="text-sm text-ink-soft">
+          <p className="mt-2 text-sm text-ink-soft">
             No expenses yet. Tap a tile above to log one.
           </p>
         ) : (
-          <div className="flex flex-col divide-y divide-ink-soft/15">
+          <div className="mt-2 flex flex-col divide-y divide-ink-soft/15">
             {recent.map((t) => (
               <TransactionRow
                 key={t.id}
@@ -107,6 +117,7 @@ export default async function HomePage() {
                   (t.item_id ? itemName.get(t.item_id) : null) ?? "Expense"
                 }
                 categoryName={categoryName.get(t.category_id) ?? ""}
+                accentColor={categoryColor.get(t.category_id)}
               />
             ))}
           </div>
