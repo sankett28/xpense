@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Design tokens (section 8 of the brief). */
+:root {
+  --bg: #a6ac92; /* page background, sage */
+  --surface: #dad9c6; /* cards and panels, cream */
+  --surface-2: #c8c8b2; /* secondary surface */
+  --ink: #1e2318; /* primary text */
+  --ink-soft: #5c634f; /* secondary text and labels */
+  --accent: #e3c13d; /* mustard, primary accent and "add" surfaces */
+  --alert: #d26b4e; /* terracotta, overrun and negative amounts */
+  --dark: #3e4634; /* dark olive blocks and icon tiles */
+  --on-dark: #e7e6d5; /* text on dark surfaces */
+}
+
+/* Expose tokens + fonts to Tailwind v4 utilities (bg-bg, text-ink, font-display, ...). */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-alert: var(--alert);
+  --color-dark: var(--dark);
+  --color-on-dark: var(--on-dark);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
+
+  /* Phone-like centered column on wider screens. */
+  --container-app: 480px;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Small uppercase labels with wide letter-spacing (recurring pattern). */
+.label-caps {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Thin vertical line "ticks" decorative motif behind budget figures. */
+.tick-motif {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--ink-soft) 0,
+    var(--ink-soft) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+  opacity: 0.18;
+}

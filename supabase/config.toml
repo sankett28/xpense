@@ -1,0 +1,13 @@
+# Minimal Supabase CLI config for X-PENSE.
+# Sufficient for `supabase link` and `supabase db push`.
+
+project_id = "x-pense"
+
+[db]
+# Default local Postgres port used by the Supabase CLI.
+port = 54322
+# Postgres major version to match Supabase's hosted default.
+major_version = 15
+
+[db.migrations]
+schema_paths = ["./migrations"]
