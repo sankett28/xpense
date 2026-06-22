@@ -1,5 +1,6 @@
 import type { Category } from "@/lib/types";
 import { formatINR } from "@/lib/utils/currency";
+import { tokenColor } from "@/lib/utils/color";
 
 export interface CategoryRowProps {
   category: Category;
@@ -10,12 +11,12 @@ export interface CategoryRowProps {
 // Full-width colour-blocked row: category name on the left, amount on the
 // right (mono, formatted). Uses the category colour as the block background.
 export function CategoryRow({ category, amount, className = "" }: CategoryRowProps) {
-  const bg = category.color ?? undefined;
+  const bg = tokenColor(category.color);
   return (
     <div
       className={[
         "flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl",
-        category.color ? "" : "bg-surface-2",
+        bg ? "" : "bg-surface-2",
         className,
       ].join(" ")}
       style={bg ? { backgroundColor: bg } : undefined}
