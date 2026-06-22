@@ -5,12 +5,15 @@ import { createClient } from "@/lib/supabase/server";
 
 export interface SignInState {
   error?: string;
+  ok?: boolean;
 }
 
 // Email + password sign-in. On success, idempotently seeds the user's profile +
-// default categories via the seed_new_user RPC, then redirects home. Returns a
-// field-level error (instead of throwing) on bad credentials so the form can
-// render it inline.
+// default categories via the seed_new_user RPC, then returns { ok: true } so the
+// CLIENT can navigate. We intentionally do NOT redirect() here: redirecting from
+// the action races the auth-cookie commit, so the follow-up RSC fetch of "/" can
+// arrive unauthenticated and get bounced by the proxy ("unexpected response").
+// Letting the client navigate after the action resolves avoids that race.
 export async function signIn(
   _prevState: SignInState,
   formData: FormData,
@@ -43,7 +46,7 @@ export async function signIn(
     return { error: "Signed in, but account setup failed. Please try again." };
   }
 
-  redirect("/");
+  return { ok: true };
 }
 
 // Sign out and return to the login page.
