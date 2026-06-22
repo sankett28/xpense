@@ -1,13 +1,13 @@
 import { Card, CardLabel } from "@/components/ui/Card";
+import { DisplayHeading } from "@/components/ui/DisplayHeading";
 
-// Dashboard stub — placeholder cards styled per the design system.
+// Dashboard stub — placeholder cards styled per the design system. The radial
+// "TOTAL SPENT" line-burst and real charts land in a later phase.
 export default function DashboardPage() {
   return (
-    <div className="py-6">
-      <header className="mb-6">
-        <h1 className="font-display text-3xl text-ink">Dashboard</h1>
-        <p className="mt-1 text-sm text-ink-soft">Coming soon.</p>
-      </header>
+    <div className="pt-4">
+      <DisplayHeading muted="Your" bold="Dashboard" />
+      <p className="mt-2 mb-6 text-sm text-ink-soft">Coming soon.</p>
 
       <div className="space-y-4">
         <Card>

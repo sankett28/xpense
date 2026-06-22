@@ -1,67 +1,45 @@
 import { Plus } from "lucide-react";
-import type { Category } from "@/lib/types";
-import { CategoryRow } from "@/components/ui/CategoryRow";
-import { Button } from "@/components/ui/Button";
+import { listCategories } from "@/lib/queries/categories";
+import { DisplayHeading } from "@/components/ui/DisplayHeading";
+import { FullBleed } from "@/components/ui/FullBleed";
+import { ColorBlock } from "@/components/ui/ColorBlock";
 
-// Dummy categories for the design-system preview (no data wiring yet).
-const SAMPLE: Array<{ category: Category; amount: number }> = [
-  {
-    category: mkCategory("Food & Dining", "#3e4634", "utensils"),
-    amount: 4200,
-  },
-  {
-    category: mkCategory("Transport", "#5c634f", "bus"),
-    amount: 1850,
-  },
-  {
-    category: mkCategory("Shopping", "#c8c8b2", "shopping"),
-    amount: 3100,
-  },
-  {
-    category: mkCategory("Bills & Utilities", null, "bills"),
-    amount: 2400,
-  },
-];
+// Categories: the signature "Add your / Budget Category" heading over stacked
+// full-bleed color blocks (name top-left, per-cycle budget bottom-right). The
+// mustard add block leads with a giant +. Full add/edit management is a later
+// phase — this is read-only for now. Follows docs/design-system.md.
+export default async function CategoriesPage() {
+  const categories = await listCategories();
 
-function mkCategory(name: string, color: string | null, icon: string): Category {
-  return {
-    id: name,
-    user_id: "sample",
-    name,
-    icon,
-    color,
-    monthly_budget: null,
-    sort_order: 0,
-    is_archived: false,
-    created_at: "2026-01-01",
-  };
-}
-
-// Categories stub — placeholder list using CategoryRow + a visual add button.
-export default function CategoriesPage() {
   return (
-    <div className="py-6">
-      <header className="mb-5 flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-3xl text-ink">Categories</h1>
-          <p className="mt-1 text-sm text-ink-soft">Coming soon.</p>
-        </div>
-        <Button size="sm" aria-label="Add category">
-          <Plus size={16} />
-          Add
-        </Button>
-      </header>
+    <div className="pt-4">
+      <DisplayHeading muted="Add your" bold="Budget Category" />
 
-      {SAMPLE.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-ink-soft/30 bg-surface/50 px-4 py-10 text-center">
-          <p className="text-ink-soft">No categories yet.</p>
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {SAMPLE.map(({ category, amount }) => (
-            <CategoryRow key={category.id} category={category} amount={amount} />
-          ))}
-        </div>
+      <FullBleed className="mt-6 flex flex-col">
+        {/* Add block (mustard, giant +). Wires to add-category in a later phase. */}
+        <ColorBlock
+          variant="accent"
+          label="Financial"
+          amount={0}
+          center={<Plus size={48} strokeWidth={1.5} className="text-ink" />}
+        />
+
+        {/* Existing categories as stacked color blocks. */}
+        {categories.map((c) => (
+          <ColorBlock
+            key={c.id}
+            variant={c.color ? "custom" : "dark"}
+            color={c.color}
+            label={c.name}
+            amount={c.monthly_budget ?? 0}
+          />
+        ))}
+      </FullBleed>
+
+      {categories.length === 0 && (
+        <p className="mt-4 text-sm text-ink-soft">
+          Your default categories will appear here after first login.
+        </p>
       )}
     </div>
   );

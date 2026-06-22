@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardLabel } from "@/components/ui/Card";
+import { DisplayHeading } from "@/components/ui/DisplayHeading";
 
 const RANGES = ["week", "month", "quarter"] as const;
 type Range = (typeof RANGES)[number];
@@ -16,11 +17,9 @@ export default async function ReportsPage({
     : "month";
 
   return (
-    <div className="py-6">
-      <header className="mb-5">
-        <h1 className="font-display text-3xl text-ink">Reports</h1>
-        <p className="mt-1 text-sm text-ink-soft">Coming soon.</p>
-      </header>
+    <div className="pt-4">
+      <DisplayHeading muted="Your" bold="Reports" />
+      <p className="mt-2 mb-5 text-sm text-ink-soft">Coming soon.</p>
 
       {/* Range toggle */}
       <div className="mb-5 inline-flex rounded-full bg-surface-2 p-1">
