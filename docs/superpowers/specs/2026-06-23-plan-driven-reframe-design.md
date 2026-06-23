@@ -18,8 +18,15 @@ that plan and answer one question on every glance:
 
 > **"Am I on pace to end this cycle with money saved?"**
 
-The reframe keeps the existing screens, design system, and logging flow. It rebuilds Home,
-Dashboard, and Reports around the plan, and adds a Plan screen as the new centerpiece.
+The reframe keeps the existing screens and logging flow, rebuilds Home, Dashboard, and
+Reports around the plan, and adds a Plan screen as the new centerpiece. It also adopts a
+**brand-new visual identity** ("Quiet Instrument") — see the Visual Design Direction section.
+The previous sage/cream/mustard editorial design system is replaced.
+
+> Note: the ASCII screen sketches further down predate the visual redesign and describe
+> *information layout* (what's on each screen), not the final look. The Visual Design
+> Direction section is the source of truth for palette, type, and the signature element;
+> apply it to every screen.
 
 ## Decisions (from brainstorming)
 
@@ -220,6 +227,98 @@ Building on the existing Supabase schema:
 - **Patterns & streaks** computed from transaction history grouped per cycle (day-of-week
   aggregation, week-of-cycle aggregation, per-cycle goal-hit history). May warrant a small
   cached/materialized summary if computation is heavy, but start with on-the-fly queries.
+
+## Visual Design Direction — "Quiet Instrument"
+
+A full new identity (the prior sage/cream/mustard editorial system is replaced). The thesis:
+**this app is a glide-path instrument, not a ledger.** Every screen answers "will I land
+safe?" The interface stays dark, quiet, and precise so the one signal — your pace — does the
+talking. Boldness is spent in exactly one place: the Glide Path and the single accent hue
+that shifts with trajectory.
+
+Built with `/frontend-design`. Deliberately avoids the three AI-default looks (cream/serif/
+terracotta editorial, neon-on-black, broadsheet). The justified risk is the **variable pace
+hue** — one accent whose color *is* the verdict — which directly serves the "calm & factual,
+no alarms" requirement.
+
+### Color tokens
+
+| Token | Hex | Role |
+|---|---|---|
+| `canvas` | `#16181D` | Near-black charcoal page — the instrument panel |
+| `panel` | `#1E2128` | Raised surfaces / cards, barely lifted |
+| `hairline` | `#2C303A` | Dividers, gauge tracks |
+| `ink` | `#F2F0E9` | Warm off-white — primary numerals & text |
+| `ink-dim` | `#8A8F9C` | Labels, captions, small-caps |
+| `pace-good` | `#5BD6C0` | Calm cyan-teal — on / ahead of pace |
+| `pace-warn` | `#E0A33E` | Warm amber — drifting / projected slightly over |
+| `pace-over` | `#E0653E` | Soft ember — meaningfully over (used sparingly) |
+
+The accent is **one variable hue** that interpolates `good → warn → over` based on the
+projection. It never flashes or alarms; it just *is* the right color. This is the entire
+emotional system in one channel. `pace-over` is reserved for the single headline number when
+truly over — never on small/decorative elements (keeps it meaningful).
+
+### Typography
+
+- **Numerals (hero):** a tight, low-contrast grotesk or mono at light weight, large size,
+  `tabular-nums`. The number is the hero of every screen. (Candidates: Geist light weights,
+  or a character mono like Commit Mono for the instrument feel — finalize at build time.)
+- **Labels:** small-caps, wide tracking (~0.14em), `ink-dim` — like gauge markings.
+- **Body / insight sentences:** a clean humanist sans (Inter or Geist Sans) at comfortable
+  reading size for plain-language insights.
+
+Personality: instrument markings meet a beautifully-set number. Not editorial-magazine, not
+friendly-rounded — precise.
+
+### Signature element — the Glide Path
+
+A horizontal track with two marks: a **tick** for "where you should be today" (expected) and
+a **dot** for "where you actually are."
+
+```
+        expected
+           │
+  ─────────●──────────────      dot LEFT of tick = under pace (pace-good)
+          you
+
+  ──────────────────●─────      dot RIGHT of tick = over pace (pace-warn/over)
+                    │
+                expected
+```
+
+The track and dot share the live pace hue. Three sizes of the same element:
+- **Home:** full-width hero, under the projected-savings number.
+- **Dashboard:** one compact strip per category.
+- Reused anywhere pace is shown. This repetition *is* the brand.
+
+### Layout & motion
+
+- Dark canvas; content in a centered phone column; generous vertical rhythm.
+- On load: numerals **count up** to value and the glide-path dot **slides** to position once
+  — a single orchestrated moment, not scattered effects.
+- `prefers-reduced-motion`: no count-up, dot appears in place.
+
+### Accessibility (quality floor, non-negotiable)
+
+- WCAG AA contrast for all text (off-white `#F2F0E9` on charcoal `#16181D` clears it).
+- Pace state is **never conveyed by color alone** — always paired with a text label
+  ("ON PACE" / "OVER") and the dot's position on the track, so it's legible to color-blind
+  users and screen readers.
+- Touch targets ≥44px; visible keyboard focus rings (in `pace-good`); full keyboard
+  operability of the keypad, sheets, and plan editor.
+- Glide Path exposes an `aria-label` summarizing pace in words; numerals announce final
+  values (not the count-up animation) to assistive tech.
+- Respects `prefers-reduced-motion` and `prefers-contrast`.
+
+### Component implications
+
+- The existing `app/globals.css` palette and primitives (`SpendCard`, `ColorBlock`,
+  `BudgetBar`, `CategoryBars`, `IconTile`, etc.) are **restyled or replaced** to the new
+  tokens. Plan a token migration in `globals.css` first, then update primitives.
+- New shared primitive: **`GlidePath`** (the signature), with `size` (hero / row) and a
+  `pace` value that drives hue + dot/tick positions.
+- A `pace-hue` helper maps a projection ratio → interpolated accent color, used everywhere.
 
 ## Out of scope (YAGNI)
 
