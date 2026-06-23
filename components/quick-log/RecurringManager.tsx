@@ -5,6 +5,7 @@ import { Plus, Pause, Play, Trash2, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { AmountText } from "@/components/ui/AmountText";
+import { DateField } from "@/components/ui/DateField";
 import {
   createRecurring,
   editRecurring,
@@ -252,11 +253,10 @@ function RecurringForm({
           {!existing && (
             <div className="flex min-w-0 flex-col">
               <label className="label-caps whitespace-nowrap">Starts</label>
-              <input
-                type="date"
+              <DateField
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1.5 block h-12 w-full min-w-0 rounded-xl bg-surface-2 px-3 text-left text-ink outline-none focus:ring-2 focus:ring-accent/40 [&::-webkit-date-and-time-value]:text-left"
+                onChange={setStartDate}
+                ariaLabel="Start date"
               />
             </div>
           )}
@@ -264,11 +264,11 @@ function RecurringForm({
             <label className="label-caps whitespace-nowrap">
               Until <span className="normal-case tracking-normal opacity-70">(blank = forever)</span>
             </label>
-            <input
-              type="date"
+            <DateField
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="mt-1.5 block h-12 w-full min-w-0 rounded-xl bg-surface-2 px-3 text-left text-ink outline-none focus:ring-2 focus:ring-accent/40 [&::-webkit-date-and-time-value]:text-left"
+              onChange={setEndDate}
+              placeholder="Forever"
+              ariaLabel="End date"
             />
           </div>
         </div>

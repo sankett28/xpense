@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { DateField } from "@/components/ui/DateField";
 import { logCredit } from "@/app/(app)/actions";
 import { CREDIT_KINDS, type CreditKind } from "@/lib/types";
 import { todayISO } from "@/lib/utils/date";
@@ -93,11 +94,10 @@ export function CreditForm() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label-caps">Date</label>
-            <input
-              type="date"
+            <DateField
               value={creditedAt}
-              onChange={(e) => setCreditedAt(e.target.value)}
-              className="mt-1 w-full rounded-xl bg-surface-2 px-3 py-3 text-ink outline-none"
+              onChange={setCreditedAt}
+              ariaLabel="Credit date"
             />
           </div>
           <div>
