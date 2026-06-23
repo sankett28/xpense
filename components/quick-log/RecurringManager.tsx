@@ -248,25 +248,27 @@ function RecurringForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 items-start gap-3">
+        <div className="grid grid-cols-2 items-end gap-3">
           {!existing && (
-            <div className="flex flex-col">
-              <label className="label-caps min-h-[2.2em] leading-tight">Starts</label>
+            <div className="flex min-w-0 flex-col">
+              <label className="label-caps whitespace-nowrap">Starts</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1.5 h-12 w-full appearance-none rounded-xl bg-surface-2 px-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
+                className="mt-1.5 block h-12 w-full min-w-0 rounded-xl bg-surface-2 px-3 text-left text-ink outline-none focus:ring-2 focus:ring-accent/40 [&::-webkit-date-and-time-value]:text-left"
               />
             </div>
           )}
-          <div className={`flex flex-col ${existing ? "col-span-2" : ""}`}>
-            <label className="label-caps min-h-[2.2em] leading-tight">Until (blank = forever)</label>
+          <div className={`flex min-w-0 flex-col ${existing ? "col-span-2" : ""}`}>
+            <label className="label-caps whitespace-nowrap">
+              Until <span className="normal-case tracking-normal opacity-70">(blank = forever)</span>
+            </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="mt-1.5 h-12 w-full appearance-none rounded-xl bg-surface-2 px-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
+              className="mt-1.5 block h-12 w-full min-w-0 rounded-xl bg-surface-2 px-3 text-left text-ink outline-none focus:ring-2 focus:ring-accent/40 [&::-webkit-date-and-time-value]:text-left"
             />
           </div>
         </div>
