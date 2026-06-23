@@ -299,3 +299,16 @@ export async function setCycleResetDayAction(day: number) {
   await setCycleResetDayValue(d);
   revalidatePlanSurfaces();
 }
+
+// Create a new spend category from the Plan screen's "Add allowance" row.
+// Returns the new category's id and name so the editor can add an allowance row
+// for it without a full page refresh.
+export async function createCategoryAction(input: {
+  name: string;
+}): Promise<{ id: string; name: string }> {
+  const name = (input.name ?? "").trim();
+  if (!name) throw new Error("Name the category");
+  const category = await addCategory({ name });
+  revalidatePlanSurfaces();
+  return { id: category.id, name: category.name };
+}

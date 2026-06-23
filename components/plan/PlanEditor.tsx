@@ -4,7 +4,12 @@ import { useMemo, useState, useTransition } from "react";
 import { AllowanceRow } from "@/components/plan/AllowanceRow";
 import { formatINR } from "@/lib/utils/currency";
 import { paceHue } from "@/lib/utils/paceHue";
-import { savePlanAction, activatePlanAction, setCycleResetDayAction } from "@/app/(app)/actions";
+import {
+  savePlanAction,
+  activatePlanAction,
+  setCycleResetDayAction,
+  createCategoryAction,
+} from "@/app/(app)/actions";
 import type { Category, Plan, PlanWithAllowances } from "@/lib/types";
 
 type AllowanceState = Record<string, number>; // categoryId -> amount
@@ -24,12 +29,16 @@ export function PlanEditor({
   const [salary, setSalary] = useState(activePlan ? Number(activePlan.salary) : 0);
   const [buffer, setBuffer] = useState(activePlan ? Number(activePlan.buffer) : 0);
   const [day, setDay] = useState(resetDay);
+  // Local category list so a newly-added category appears immediately, before
+  // the server round-trip revalidates the page.
+  const [cats, setCats] = useState<Category[]>(categories);
   const [allowances, setAllowances] = useState<AllowanceState>(() => {
     const init: AllowanceState = {};
     for (const c of categories) init[c.id] = 0;
     for (const a of activePlan?.allowances ?? []) init[a.category_id] = Number(a.amount);
     return init;
   });
+  const [newCategory, setNewCategory] = useState("");
   const [selectedPlanId, setSelectedPlanId] = useState(activePlan?.id ?? "");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +54,35 @@ export function PlanEditor({
     setAllowances((prev) => ({ ...prev, [categoryId]: next }));
   }
 
+  function addCategory() {
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    setError(null);
+    start(async () => {
+      try {
+        const created = await createCategoryAction({ name: trimmed });
+        // The editor only reads id + name; fill the rest with sensible defaults
+        // so the local list stays a well-formed Category[].
+        const cat: Category = {
+          id: created.id,
+          user_id: "",
+          name: created.name,
+          icon: null,
+          color: null,
+          monthly_budget: null,
+          sort_order: cats.length,
+          is_archived: false,
+          created_at: "",
+        };
+        setCats((prev) => [...prev, cat]);
+        setAllowances((prev) => ({ ...prev, [created.id]: 0 }));
+        setNewCategory("");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Could not add category");
+      }
+    });
+  }
+
   function save(makeNew: boolean) {
     setError(null);
     start(async () => {
@@ -56,7 +94,7 @@ export function PlanEditor({
           salary,
           buffer,
           makeActive: true,
-          allowances: categories.map((c) => ({ categoryId: c.id, amount: allowances[c.id] ?? 0 })),
+          allowances: cats.map((c) => ({ categoryId: c.id, amount: allowances[c.id] ?? 0 })),
         });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not save");
@@ -124,7 +162,7 @@ export function PlanEditor({
 
       <p className="label-caps mt-8">Allowances</p>
       <div>
-        {categories.map((c) => (
+        {cats.map((c) => (
           <AllowanceRow
             key={c.id}
             name={c.name}
@@ -132,6 +170,30 @@ export function PlanEditor({
             onChange={(n) => setAmount(c.id, n)}
           />
         ))}
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <input
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addCategory();
+            }
+          }}
+          placeholder="New category"
+          className="flex-1 bg-panel text-ink rounded-md px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-pace-good"
+          aria-label="New category name"
+        />
+        <button
+          type="button"
+          onClick={addCategory}
+          disabled={pending || !newCategory.trim()}
+          className="rounded-md border border-hairline text-ink py-2 px-4 disabled:opacity-50"
+        >
+          Add
+        </button>
       </div>
 
       <label className="mt-4 flex items-center justify-between">
