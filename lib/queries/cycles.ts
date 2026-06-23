@@ -70,6 +70,30 @@ export async function getCycleTotals(
   };
 }
 
+// Spend per category within a resolved cycle, as a { category_id: total } map.
+// Used by the soft-budget bars on the Categories screen.
+export async function getSpendByCategory(
+  cycle: ResolvedCycle,
+): Promise<Record<string, number>> {
+  const supabase = await createClient();
+  const exclusiveEnd = addDays(cycle.end, 1);
+
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("category_id, amount")
+    .gte("spent_at", cycle.start)
+    .lt("spent_at", exclusiveEnd);
+
+  if (error) throw error;
+
+  const byCategory: Record<string, number> = {};
+  for (const row of data ?? []) {
+    const id = (row as { category_id: string }).category_id;
+    byCategory[id] = (byCategory[id] ?? 0) + Number((row as { amount: number }).amount);
+  }
+  return byCategory;
+}
+
 function sumAmounts(rows: { amount: number }[] | null): number {
   if (!rows) return 0;
   return rows.reduce((acc, r) => acc + Number(r.amount), 0);
