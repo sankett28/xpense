@@ -116,7 +116,7 @@ function FastEntryForm({ target, categories, onClose }: FastEntryFormProps) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Chai, Auto, Groceries"
+          placeholder=""
           className="mt-1.5 w-full rounded-xl bg-surface-2 px-4 py-3.5 text-lg text-ink placeholder:text-ink-soft/60 outline-none focus:ring-2 focus:ring-accent/40"
         />
       </div>
