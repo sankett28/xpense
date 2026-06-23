@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
+import { DateField } from "@/components/ui/DateField";
 import { formatINR } from "@/lib/utils/currency";
 import { editExpense, removeExpense } from "@/app/(app)/actions";
 import { toISODate } from "@/lib/utils/date";
@@ -138,8 +139,8 @@ function EditForm({
                 className={[
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   active
-                    ? "bg-ink text-on-dark"
-                    : "bg-surface-2 text-ink-soft hover:text-ink",
+                    ? "bg-pace-good text-canvas"
+                    : "bg-surface-2 text-ink hover:bg-surface-2/70",
                 ].join(" ")}
               >
                 {c.name}
@@ -151,12 +152,7 @@ function EditForm({
 
       <div>
         <label className="label-caps">Date</label>
-        <input
-          type="date"
-          value={spentAt}
-          onChange={(e) => setSpentAt(e.target.value)}
-          className="mt-1.5 w-full rounded-xl bg-surface-2 px-4 py-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
-        />
+        <DateField value={spentAt} onChange={setSpentAt} ariaLabel="Spent date" />
       </div>
 
       {error && <p className="text-center text-sm text-alert">{error}</p>}

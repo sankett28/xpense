@@ -14,12 +14,12 @@ export function PaceHeadline({ pace }: { pace: PaceResult }) {
       <p className="label-caps">{verdictLabel(pace.verdict)}</p>
       <p className="mt-1 text-xs text-ink-dim">Projected to save</p>
       <p
-        className="font-display tabular-nums text-5xl font-light leading-none mt-1"
+        className="font-display tabular-nums text-7xl font-light leading-none mt-1"
         style={{ color: numberColor }}
       >
         {formatINR(pace.projectedSavings)}
       </p>
-      <p className="mt-2 text-sm text-ink-dim">
+      <p className="mt-2 text-lg text-ink-dim">
         Goal {formatINR(pace.savingsGoal)} · {formatINR(gap)} {gapWord}
       </p>
       <GlidePath paceRatio={pace.paceRatio} size="hero" />

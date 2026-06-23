@@ -13,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { signOut } from "@/app/(auth)/login/actions";
+import { APP_NAME } from "@/lib/config";
 
 const MENU_LINKS = [
   { href: "/", label: "Home", icon: Home },
@@ -60,7 +61,16 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[480px] items-center justify-end px-4 py-3">
+      <div className="mx-auto flex w-full max-w-[480px] items-center justify-between px-4 py-3">
+        {/* Wordmark — placeholder until a logo asset is supplied. */}
+        <Link
+          href="/"
+          aria-label={`${APP_NAME} home`}
+          className="font-display text-lg font-semibold tracking-[0.18em] text-ink"
+        >
+          {APP_NAME}
+        </Link>
+
         {/* Menu — a rounded square dot-grid, matching the Home sketch. */}
         <div className="relative" ref={ref}>
           <button

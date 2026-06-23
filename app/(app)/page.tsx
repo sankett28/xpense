@@ -49,7 +49,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-3">
       <dt className="label-caps">{label}</dt>
-      <dd className="tabular-nums text-ink">{value}</dd>
+      <dd className="tabular-nums text-ink text-xl">{value}</dd>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Plus, Pause, Play, Trash2, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { AmountText } from "@/components/ui/AmountText";
+import { DateField } from "@/components/ui/DateField";
 import {
   createRecurring,
   editRecurring,
@@ -238,8 +239,8 @@ function RecurringForm({
                 className={[
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   c.id === categoryId
-                    ? "bg-ink text-on-dark"
-                    : "bg-surface-2 text-ink-soft hover:text-ink",
+                    ? "bg-pace-good text-canvas"
+                    : "bg-surface-2 text-ink hover:bg-surface-2/70",
                 ].join(" ")}
               >
                 {c.name}
@@ -248,25 +249,26 @@ function RecurringForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 items-end gap-3">
           {!existing && (
-            <div>
-              <label className="label-caps">Starts</label>
-              <input
-                type="date"
+            <div className="flex min-w-0 flex-col">
+              <label className="label-caps whitespace-nowrap">Starts</label>
+              <DateField
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1.5 w-full rounded-xl bg-surface-2 px-3 py-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
+                onChange={setStartDate}
+                ariaLabel="Start date"
               />
             </div>
           )}
-          <div className={existing ? "col-span-2" : ""}>
-            <label className="label-caps">Until (blank = forever)</label>
-            <input
-              type="date"
+          <div className={`flex min-w-0 flex-col ${existing ? "col-span-2" : ""}`}>
+            <label className="label-caps whitespace-nowrap">
+              Until <span className="normal-case tracking-normal opacity-70">(blank = forever)</span>
+            </label>
+            <DateField
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-surface-2 px-3 py-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
+              onChange={setEndDate}
+              placeholder="Forever"
+              ariaLabel="End date"
             />
           </div>
         </div>
