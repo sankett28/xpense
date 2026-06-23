@@ -16,7 +16,7 @@ function dayOfWeek(ts: string): number {
 }
 
 export function computeInsights(rows: Row[], opts?: { minRows?: number }): Insight[] {
-  const minRows = opts?.minRows ?? 14;
+  const minRows = opts?.minRows ?? 15;
   if (rows.length < minRows) return [];
 
   const insights: Insight[] = [];
