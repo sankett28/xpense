@@ -1,158 +1,89 @@
-import Link from "next/link";
-import { Card, CardLabel } from "@/components/ui/Card";
-import { DisplayHeading } from "@/components/ui/DisplayHeading";
-import { AmountText } from "@/components/ui/AmountText";
-import { CategoryBars } from "@/components/ui/CategoryBars";
-import {
-  getRangeReport,
-  getRangeComparison,
-  type ReportRange,
-} from "@/lib/queries/reports";
-import { listCategories } from "@/lib/queries/categories";
+import { getInsights } from "@/lib/queries/insights";
+import { getCyclePace } from "@/lib/queries/pace";
 import { formatINR } from "@/lib/utils/currency";
-import { formatDateRange } from "@/lib/utils/date";
+import type { Insight } from "@/lib/types";
 
-const RANGES = ["week", "month", "quarter"] as const;
+// Reports: progress (are you improving?), plain-language patterns, and where the
+// money went. Insights only appear with enough data.
+export default async function ReportsPage() {
+  const [insightsData, paceData] = await Promise.all([getInsights(), getCyclePace()]);
+  const { insights, savedThisCycle, savedLastCycle, streak } = insightsData;
 
-// Reports: rolling week / month / quarter spend — total, daily average, count,
-// and a per-category breakdown. Wired to the live data layer. Trend charts are
-// a later phase.
-export default async function ReportsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ range?: string }>;
-}) {
-  const { range } = await searchParams;
-  const active: ReportRange = (RANGES as readonly string[]).includes(range ?? "")
-    ? (range as ReportRange)
-    : "month";
-
-  const [report, comparison, categories] = await Promise.all([
-    getRangeReport(active),
-    getRangeComparison(active),
-    listCategories(),
-  ]);
-
-  const catName = new Map(categories.map((c) => [c.id, c.name]));
-  const catColor = new Map(categories.map((c) => [c.id, c.color]));
-
-  const cmp = comparison.total;
-  const up = cmp.delta > 0;
-  const rangeWord = active === "week" ? "week" : active === "month" ? "30 days" : "quarter";
-
-  // Categories with the biggest swing vs the previous period.
-  const movers = comparison.byCategory
-    .map((c) => ({
-      name: catName.get(c.categoryId) ?? "Uncategorized",
-      delta: c.current - c.previous,
-    }))
-    .filter((c) => Math.abs(c.delta) > 0)
-    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
-    .slice(0, 4);
-
-  const bars = report.byCategory.map((c) => ({
-    id: c.categoryId,
-    name: catName.get(c.categoryId) ?? "Uncategorized",
-    color: catColor.get(c.categoryId) ?? null,
-    total: c.total,
-  }));
+  const delta = savedLastCycle != null ? savedThisCycle - savedLastCycle : null;
+  const bySpent = [...(paceData?.categories ?? [])].sort((a, b) => b.spent - a.spent);
+  const peak = bySpent[0]?.spent ?? 0;
 
   return (
-    <div className="pt-4">
-      <DisplayHeading muted="Your" bold="Reports" />
-      <p className="mt-2 mb-5 text-sm text-ink-soft">
-        {formatDateRange(report.bounds.start, report.bounds.end)}
-      </p>
+    <div className="pt-8">
+      <p className="label-caps">Your insights</p>
 
-      {/* Range toggle */}
-      <div className="mb-5 inline-flex rounded-full bg-surface-2 p-1">
-        {RANGES.map((r) => {
-          const isActive = r === active;
-          return (
-            <Link
-              key={r}
-              href={`/reports?range=${r}`}
-              aria-current={isActive ? "page" : undefined}
-              className={[
-                "rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors",
-                isActive
-                  ? "bg-accent text-on-dark"
-                  : "text-ink-soft hover:text-ink",
-              ].join(" ")}
-            >
-              {r}
-            </Link>
-          );
-        })}
+      <p className="label-caps mt-6">Progress</p>
+      <div className="mt-2 divide-y divide-hairline border-t border-hairline">
+        <Row label="Saved this cycle" value={formatINR(savedThisCycle)} />
+        {delta != null ? (
+          <Row
+            label="vs last cycle"
+            value={`${delta >= 0 ? "▲" : "▼"} ${formatINR(Math.abs(delta))}`}
+          />
+        ) : null}
+        {streak > 0 ? (
+          <Row label="Streak" value={`🔥 ${streak} ${streak === 1 ? "cycle" : "cycles"} on goal`} />
+        ) : null}
       </div>
 
-      {/* Totals */}
-      <Card>
-        <CardLabel>Total spent</CardLabel>
-        <div className="mt-2">
-          <AmountText amount={report.totalSpent} size="lg" />
-        </div>
-        <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-ink-soft">
-          <span>
-            Daily avg{" "}
-            <AmountText amount={Math.round(report.dailyAverage)} size="sm" />
-          </span>
-          <span>
-            {report.count} {report.count === 1 ? "expense" : "expenses"}
-          </span>
-        </div>
-      </Card>
-
-      {/* vs previous period */}
-      <Card className="mt-4">
-        <CardLabel>vs previous {rangeWord}</CardLabel>
-        <p className="mt-2 text-ink">
-          {cmp.previous === 0 ? (
-            "No spending in the previous period to compare."
-          ) : (
-            <>
-              <span className={up ? "text-alert" : "text-ink"}>
-                {up ? "Up" : "Down"} {formatINR(Math.abs(cmp.delta))}
-              </span>{" "}
-              <span className="text-ink-soft">
-                ({cmp.deltaPct !== null ? `${up ? "+" : "−"}${Math.abs(Math.round(cmp.deltaPct))}%` : "—"} ·
-                was {formatINR(cmp.previous)})
-              </span>
-            </>
-          )}
-        </p>
-
-        {movers.length > 0 && (
-          <div className="mt-3 flex flex-col gap-1.5 border-t border-ink-soft/15 pt-3">
-            {movers.map((m) => {
-              const moverUp = m.delta > 0;
-              return (
-                <div
-                  key={m.name}
-                  className="flex items-baseline justify-between text-sm"
-                >
-                  <span className="text-ink">{m.name}</span>
-                  <span
-                    className={[
-                      "font-mono tabular-nums",
-                      moverUp ? "text-alert" : "text-ink-soft",
-                    ].join(" ")}
-                  >
-                    {moverUp ? "+" : "−"}
-                    {formatINR(Math.abs(m.delta))}
-                  </span>
-                </div>
-              );
-            })}
+      {insights.length > 0 ? (
+        <>
+          <p className="label-caps mt-8">What the numbers say</p>
+          <div className="mt-2 space-y-4">
+            {insights.map((i: Insight, idx) => (
+              <div key={idx}>
+                <p className="text-ink">{i.headline}</p>
+                <p className="text-sm text-ink-dim">{i.detail}</p>
+              </div>
+            ))}
           </div>
-        )}
-      </Card>
+        </>
+      ) : (
+        <p className="mt-8 text-sm text-ink-dim">
+          Keep logging — patterns appear once there's enough data.
+        </p>
+      )}
 
-      {/* Spend by category */}
-      <Card className="mt-4">
-        <CardLabel>Spend by category</CardLabel>
-        <CategoryBars data={bars} className="mt-4" />
-      </Card>
+      {bySpent.length > 0 ? (
+        <>
+          <p className="label-caps mt-8">Where it went</p>
+          <div className="mt-2 space-y-2">
+            {bySpent.map((c) => (
+              <div key={c.categoryId}>
+                <div className="flex items-center justify-between">
+                  <span className="text-ink text-sm">{c.name}</span>
+                  <span className="tabular-nums text-sm text-ink">{formatINR(c.spent)}</span>
+                </div>
+                <div className="glide-track mt-1" style={{ ["--pace-hue" as string]: "var(--color-ink-dim)" }}>
+                  <span
+                    className="absolute left-0 top-0 h-full rounded-full"
+                    style={{
+                      width: peak > 0 ? `${(c.spent / peak) * 100}%` : "0%",
+                      background: "var(--color-ink-dim)",
+                      height: "2px",
+                    }}
+                    aria-hidden
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <span className="label-caps">{label}</span>
+      <span className="tabular-nums text-ink">{value}</span>
     </div>
   );
 }
