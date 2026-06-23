@@ -5,23 +5,23 @@ import Link from "next/link";
 import {
   Home,
   Wallet,
-  Tag,
   LayoutDashboard,
   BarChart3,
   History,
   Repeat,
+  Target,
   LogOut,
 } from "lucide-react";
 import { signOut } from "@/app/(auth)/login/actions";
 
 const MENU_LINKS = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/history", label: "History", icon: History },
-  { href: "/credits", label: "Credits", icon: Wallet },
-  { href: "/recurring", label: "Recurring", icon: Repeat },
-  { href: "/categories", label: "Categories", icon: Tag },
+  { href: "/plan", label: "Plan", icon: Target },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/history", label: "History", icon: History },
+  { href: "/recurring", label: "Recurring", icon: Repeat },
+  { href: "/credits", label: "Add income", icon: Wallet },
 ] as const;
 
 // 3x3 dot-grid menu glyph.
