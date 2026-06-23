@@ -30,9 +30,13 @@ alter table transactions
 
 -- One materialization per template per calendar month. The partial unique index
 -- is keyed on (recurring_id, month-start of spent_at) so re-running the
--- materializer is idempotent.
+-- materializer is idempotent. `spent_at` is timestamptz, on which date_trunc is
+-- only STABLE (it depends on the session TZ) — and an index expression must be
+-- IMMUTABLE. Anchoring to UTC (`at time zone 'UTC'` yields a plain timestamp)
+-- makes date_trunc immutable. The materializer's ON CONFLICT below uses the
+-- identical expression so the two match.
 create unique index transactions_recurring_month_uniq
-  on transactions (recurring_id, (date_trunc('month', spent_at)))
+  on transactions (recurring_id, (date_trunc('month', spent_at at time zone 'UTC')))
   where recurring_id is not null;
 
 -- Materialize all due recurring expenses for the user, up to today. Inserts a
@@ -74,7 +78,7 @@ begin
           p_user_id, r.category_id, r.amount, r.name,
           (charge_date::timestamptz + interval '12 hours'), r.id
         )
-        on conflict (recurring_id, (date_trunc('month', spent_at)))
+        on conflict (recurring_id, (date_trunc('month', spent_at at time zone 'UTC')))
           where recurring_id is not null
           do nothing;
         if found then inserted := inserted + 1; end if;
