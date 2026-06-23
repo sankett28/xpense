@@ -1,16 +1,20 @@
 @import "tailwindcss";
 
-/* Design tokens (section 8 of the brief). */
+/* Design tokens — "warm paper + indigo + a single teal" direction.
+   Sourced from the Star Dust / Japanese Indigo / Steel Teal / Mid Grey palette.
+   Boldness is spent on the + glyph and the lone teal accent; everything else is
+   quiet, high-contrast paper. See docs/design-system.md. */
 :root {
-  --bg: #a6ac92; /* page background, sage */
-  --surface: #dad9c6; /* cards and panels, cream */
-  --surface-2: #c8c8b2; /* secondary surface */
-  --ink: #1e2318; /* primary text */
-  --ink-soft: #5c634f; /* secondary text and labels */
-  --accent: #e3c13d; /* mustard, primary accent and "add" surfaces */
-  --alert: #d26b4e; /* terracotta, overrun and negative amounts */
-  --dark: #3e4634; /* dark olive blocks and icon tiles */
-  --on-dark: #e7e6d5; /* text on dark surfaces */
+  --bg: #f2edea; /* page background, Star Dust (warm off-white) */
+  --surface: #f9f3f1; /* cards/panels, Star Dust lighter (barely raised) */
+  --surface-2: #e7e0db; /* secondary surface / bar tracks */
+  --ink: #16303d; /* primary text, Japanese Indigo (near-black, blue soul) */
+  --ink-soft: #757575; /* secondary text and labels, Mid Grey */
+  --accent: #3f5a66; /* the one accent, Steel Teal (active states, progress) */
+  --accent-bright: #517380; /* lighter Steel Teal for hover/emphasis */
+  --alert: #b4533f; /* warm rust for overspend/negative (doesn't fight teal) */
+  --dark: #16303d; /* deep indigo blocks and icon tiles */
+  --on-dark: #f2edea; /* Star Dust text on dark/indigo surfaces */
 }
 
 /* Expose tokens + fonts to Tailwind v4 utilities (bg-bg, text-ink, font-display, ...). */
@@ -21,6 +25,7 @@
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
   --color-alert: var(--alert);
   --color-dark: var(--dark);
   --color-on-dark: var(--on-dark);

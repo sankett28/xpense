@@ -3,19 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  User,
   Home,
   Wallet,
   Tag,
   LayoutDashboard,
   BarChart3,
+  History,
+  Repeat,
   LogOut,
 } from "lucide-react";
 import { signOut } from "@/app/(auth)/login/actions";
 
 const MENU_LINKS = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/history", label: "History", icon: History },
   { href: "/credits", label: "Credits", icon: Wallet },
+  { href: "/recurring", label: "Recurring", icon: Repeat },
   { href: "/categories", label: "Categories", icon: Tag },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/reports", label: "Reports", icon: BarChart3 },
@@ -32,8 +35,8 @@ function DotGrid() {
   );
 }
 
-// Authenticated top bar: avatar at left, dot-grid menu at right that opens a
-// small dropdown with navigation + a sign-out action.
+// Authenticated top bar: a single 3x3 dot-grid menu at the right (per the Home
+// sketch) that opens a small dropdown with navigation + a sign-out action.
 export function TopBar() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -57,17 +60,8 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-40 bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[480px] items-center justify-between px-4 py-3">
-        {/* Avatar */}
-        <Link
-          href="/"
-          aria-label="Account"
-          className="grid h-10 w-10 place-items-center rounded-full bg-dark text-on-dark"
-        >
-          <User size={18} />
-        </Link>
-
-        {/* Menu */}
+      <div className="mx-auto flex w-full max-w-[480px] items-center justify-end px-4 py-3">
+        {/* Menu — a rounded square dot-grid, matching the Home sketch. */}
         <div className="relative" ref={ref}>
           <button
             type="button"
@@ -75,7 +69,7 @@ export function TopBar() {
             aria-haspopup="menu"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="grid h-10 w-10 place-items-center rounded-full hover:bg-surface-2/60 active:bg-surface-2"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-ink/10 bg-surface hover:bg-surface-2/60 active:bg-surface-2"
           >
             <DotGrid />
           </button>
