@@ -45,7 +45,7 @@ export default async function ReportsPage() {
         </>
       ) : (
         <p className="mt-8 text-sm text-ink-dim">
-          Keep logging — patterns appear once there's enough data.
+          Keep logging — patterns appear once there&apos;s enough data.
         </p>
       )}
 

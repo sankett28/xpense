@@ -20,7 +20,7 @@ function resetDateFor(year: number, monthIndex0: number, resetDay: number): stri
 }
 
 export function resolveCalendarCycle(resetDay: number, today: string): CalendarCycle {
-  const [ty, tm, td] = today.split("-").map(Number);
+  const [ty, tm] = today.split("-").map(Number);
   const year = ty;
   const monthIndex0 = (tm ?? 1) - 1;
 
