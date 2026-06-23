@@ -1,7 +1,5 @@
 "use client";
 
-import { formatINR } from "@/lib/utils/currency";
-
 // One editable allowance row: category name + a numeric amount input.
 export function AllowanceRow({
   name,

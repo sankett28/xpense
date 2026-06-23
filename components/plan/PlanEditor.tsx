@@ -30,6 +30,7 @@ export function PlanEditor({
     for (const a of activePlan?.allowances ?? []) init[a.category_id] = Number(a.amount);
     return init;
   });
+  const [selectedPlanId, setSelectedPlanId] = useState(activePlan?.id ?? "");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -69,8 +70,9 @@ export function PlanEditor({
 
       {plans.length > 1 ? (
         <select
-          value={activePlan?.id ?? ""}
-          onChange={(e) => start(() => activatePlanAction(e.target.value))}
+          value={selectedPlanId}
+          onChange={(e) => { const id = e.target.value; setSelectedPlanId(id); start(() => activatePlanAction(id)); }}
+          disabled={pending}
           className="mt-2 bg-panel text-ink rounded-md px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-pace-good"
           aria-label="Switch active plan"
         >
@@ -88,6 +90,7 @@ export function PlanEditor({
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="mt-1 w-full bg-panel text-ink rounded-md px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-pace-good"
+          aria-label="Plan name"
         />
       </label>
 
