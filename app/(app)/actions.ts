@@ -14,6 +14,8 @@ import {
   updateRecurring,
   deleteRecurring,
 } from "@/lib/queries/recurring";
+import { savePlan, activatePlan, ensureDefaultPlan } from "@/lib/queries/plans";
+import { setCycleResetDayValue } from "@/lib/queries/profile";
 import type { CreditKind } from "@/lib/types";
 
 // Refresh every surface that reflects spend after a transaction changes.
@@ -247,4 +249,54 @@ export async function logCredit(input: {
   revalidatePath("/");
   revalidatePath("/credits");
   revalidatePath("/dashboard");
+}
+
+// Every surface whose numbers depend on the active plan.
+function revalidatePlanSurfaces() {
+  revalidatePath("/");
+  revalidatePath("/plan");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
+}
+
+export async function savePlanAction(input: {
+  id?: string | null;
+  name: string;
+  salary: number;
+  buffer: number;
+  makeActive?: boolean;
+  allowances: Array<{ categoryId: string; amount: number }>;
+}) {
+  const name = (input.name ?? "").trim();
+  if (!name) throw new Error("Give the plan a name");
+  const salary = Number(input.salary);
+  if (!Number.isFinite(salary) || salary < 0) throw new Error("Enter a valid salary");
+  const buffer = Number(input.buffer);
+  if (!Number.isFinite(buffer) || buffer < 0) throw new Error("Buffer can't be negative");
+
+  await ensureDefaultPlan();
+  await savePlan({
+    id: input.id ?? null,
+    name,
+    salary,
+    buffer,
+    makeActive: input.makeActive ?? true,
+    allowances: input.allowances
+      .map((a) => ({ categoryId: a.categoryId, amount: Number(a.amount) || 0 }))
+      .filter((a) => a.categoryId),
+  });
+  revalidatePlanSurfaces();
+}
+
+export async function activatePlanAction(planId: string) {
+  if (!planId) throw new Error("Missing plan id");
+  await activatePlan(planId);
+  revalidatePlanSurfaces();
+}
+
+export async function setCycleResetDayAction(day: number) {
+  const d = Number(day);
+  if (!Number.isFinite(d) || d < 1 || d > 31) throw new Error("Pick a day between 1 and 31");
+  await setCycleResetDayValue(d);
+  revalidatePlanSurfaces();
 }
