@@ -12,6 +12,21 @@
   --pace-good: #5bd6c0; /* on/ahead of pace (teal) */
   --pace-warn: #e0a33e; /* drifting (amber) */
   --pace-over: #e0653e; /* meaningfully over (ember) */
+
+  /* Legacy token aliases — the pre-redesign screens (credits, history,
+     recurring, login, and many primitives) still reference these names. Map
+     each onto the Quiet Instrument palette so they render correctly in the dark
+     theme without rewriting every file. Also backs tokenColor() in
+     lib/utils/color.ts, which resolves DB category colors to var(--<token>). */
+  --bg: var(--canvas);
+  --surface: var(--panel);
+  --surface-2: #262a33; /* a touch above panel, for bar tracks / secondary fills */
+  --ink-soft: var(--ink-dim);
+  --accent: var(--pace-good); /* the one accent is now the pace teal */
+  --accent-bright: #74e0cd; /* lighter teal for hover/emphasis */
+  --alert: var(--pace-over); /* overspend / negative */
+  --dark: #262a33; /* icon tiles / dark blocks — raised panel */
+  --on-dark: var(--ink); /* text on dark/raised surfaces */
 }
 
 @theme inline {
@@ -23,6 +38,19 @@
   --color-pace-good: var(--pace-good);
   --color-pace-warn: var(--pace-warn);
   --color-pace-over: var(--pace-over);
+
+  /* Legacy color utilities (bg-bg, bg-surface, text-ink-soft, bg-accent,
+     bg-alert, bg-dark, text-on-dark, bg-surface-2, …) for the not-yet-rewritten
+     screens. Aliased to the dark palette above. */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
+  --color-alert: var(--alert);
+  --color-dark: var(--dark);
+  --color-on-dark: var(--on-dark);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
