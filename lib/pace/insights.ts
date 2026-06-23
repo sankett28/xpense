@@ -11,8 +11,9 @@ interface Row {
 }
 
 function dayOfWeek(ts: string): number {
-  // 0=Sun..6=Sat, local.
-  return new Date(ts).getDay();
+  // 0=Sun..6=Sat, UTC. Supabase returns timestamptz as UTC ISO strings;
+  // using getUTCDay() keeps classification deterministic regardless of server timezone.
+  return new Date(ts).getUTCDay();
 }
 
 export function computeInsights(rows: Row[], opts?: { minRows?: number }): Insight[] {

@@ -25,11 +25,12 @@ describe("computeInsights", () => {
 
   it("detects a weekend-heavy pattern", () => {
     const rows: Array<{ amount: number; spent_at: string; cycle_start: string }> = [];
-    // 4 weekend days at 1400, 10 weekday days at 200 -> weekend much higher
+    // 4 weekend days at 1400, 11 weekday days at 200 -> weekend much higher
+    // Timestamps use Z suffix so getUTCDay() classification is deterministic (4 weekend + 11 weekday = 15 rows).
     const weekend = ["2026-06-27", "2026-06-28", "2026-07-04", "2026-07-05"]; // Sat/Sun
     const weekday = ["2026-06-25","2026-06-26","2026-06-29","2026-06-30","2026-07-01","2026-07-02","2026-07-03","2026-07-06","2026-07-07","2026-07-08","2026-07-09"];
-    for (const d of weekend) rows.push({ amount: 1400, spent_at: `${d}T10:00:00`, cycle_start: "2026-06-25" });
-    for (const d of weekday) rows.push({ amount: 200, spent_at: `${d}T10:00:00`, cycle_start: "2026-06-25" });
+    for (const d of weekend) rows.push({ amount: 1400, spent_at: `${d}T10:00:00Z`, cycle_start: "2026-06-25" });
+    for (const d of weekday) rows.push({ amount: 200, spent_at: `${d}T10:00:00Z`, cycle_start: "2026-06-25" });
     const insights = computeInsights(rows);
     expect(insights.some((i) => i.kind === "weekday")).toBe(true);
   });
