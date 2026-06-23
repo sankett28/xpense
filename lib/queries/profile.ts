@@ -40,3 +40,33 @@ export async function getGreetingName(): Promise<string> {
   const name = display?.trim() || fromEmail || "there";
   return name.split(/[\s.]+/)[0];
 }
+
+// The user's calendar cycle reset day (1..31). Defaults to 25 if unset.
+export async function getCycleResetDay(): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 25;
+  const { data } = await supabase
+    .from("profiles")
+    .select("cycle_reset_day")
+    .eq("id", user.id)
+    .maybeSingle();
+  const day = (data as { cycle_reset_day: number | null } | null)?.cycle_reset_day;
+  return day ?? 25;
+}
+
+export async function setCycleResetDayValue(day: number): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  const clamped = Math.min(31, Math.max(1, Math.round(day)));
+  const { error } = await supabase
+    .from("profiles")
+    .update({ cycle_reset_day: clamped })
+    .eq("id", user.id);
+  if (error) throw error;
+}
