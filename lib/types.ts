@@ -112,3 +112,80 @@ export interface ResolvedCycle {
   isOpen: boolean; // true when this is the current, unbounded cycle
   dayNumber: number; // 1-based day within the cycle (relative to today)
 }
+
+// --- Plan-driven reframe ---
+
+export interface Plan {
+  id: string;
+  user_id: string;
+  name: string;
+  salary: number;
+  buffer: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlanAllowance {
+  id: string;
+  plan_id: string;
+  category_id: string;
+  amount: number;
+}
+
+// A plan joined with its allowances and the categories they reference.
+export interface PlanWithAllowances extends Plan {
+  allowances: Array<PlanAllowance & { category: Category }>;
+}
+
+// Calendar cycle derived from a reset day. Half-open [start, end): `end` is the
+// first day of the NEXT cycle. `daysInCycle` and `daysElapsed` drive pacing.
+export interface CalendarCycle {
+  start: string; // YYYY-MM-DD inclusive
+  end: string; // YYYY-MM-DD exclusive (next cycle's start)
+  daysInCycle: number; // total days in [start, end)
+  daysElapsed: number; // 1-based: today counts as elapsed (clamped 1..daysInCycle)
+  daysRemaining: number; // daysInCycle - daysElapsed, clamped >= 0
+}
+
+// Everything the pure pace math needs. No Supabase, no Date.now inside.
+export interface PaceInputs {
+  salary: number;
+  buffer: number;
+  committed: number; // full-cycle recurring total, reserved upfront
+  spentSoFar: number; // discretionary spend so far this cycle
+  cycle: CalendarCycle;
+}
+
+export type PaceVerdict = "under" | "on" | "over";
+
+export interface PaceResult {
+  spendable: number; // salary - savingsGoalDerived... see note; = salary - buffer - committed
+  savingsGoal: number; // derived: salary - allocated(allowances) - buffer  (set by caller)
+  expectedByToday: number; // spendable * daysElapsed / daysInCycle
+  projectedSpend: number; // spentSoFar / daysElapsed * daysInCycle
+  projectedSavings: number; // salary - projectedSpend - committed - buffer
+  safeToSpendToday: number; // remaining discretionary / daysRemaining (>=0)
+  verdict: PaceVerdict; // under/on/over vs expectedBytoday (with tolerance)
+  paceRatio: number; // projectedSpend / spendable (1.0 = exactly on plan)
+}
+
+export interface CategoryPace {
+  categoryId: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  allowance: number;
+  spent: number;
+  projected: number; // spent / daysElapsed * daysInCycle
+  verdict: PaceVerdict;
+  paceRatio: number; // projected / allowance
+}
+
+export type InsightKind = "weekday" | "week-of-cycle" | "recurring-leak";
+
+export interface Insight {
+  kind: InsightKind;
+  headline: string; // "You overspend most on weekends"
+  detail: string; // "Sat–Sun avg ₹1,400/day vs ₹620 weekdays"
+}
