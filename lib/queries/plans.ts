@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Category, Plan, PlanWithAllowances } from "@/lib/types";
+import type { Plan, PlanWithAllowances } from "@/lib/types";
 
 export interface SavePlanInput {
   id?: string | null; // present = update; absent = create new
@@ -95,6 +95,8 @@ export async function savePlan(input: SavePlanInput): Promise<PlanWithAllowances
     if (error) throw error;
     planId = (data as { id: string }).id;
   }
+
+  if (!planId) throw new Error("Could not resolve plan id");
 
   // Replace allowances wholesale (simple + correct for an authored document).
   const { error: delErr } = await supabase.from("plan_allowances").delete().eq("plan_id", planId);
