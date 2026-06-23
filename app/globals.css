@@ -1,64 +1,79 @@
 @import "tailwindcss";
 
-/* Design tokens — "warm paper + indigo + a single teal" direction.
-   Sourced from the Star Dust / Japanese Indigo / Steel Teal / Mid Grey palette.
-   Boldness is spent on the + glyph and the lone teal accent; everything else is
-   quiet, high-contrast paper. See docs/design-system.md. */
+/* Quiet Instrument — dark instrument panel. One variable accent hue (the pace
+   color) carries the verdict; everything else is quiet and high-contrast.
+   See docs/superpowers/specs/2026-06-23-plan-driven-reframe-design.md. */
 :root {
-  --bg: #f2edea; /* page background, Star Dust (warm off-white) */
-  --surface: #f9f3f1; /* cards/panels, Star Dust lighter (barely raised) */
-  --surface-2: #e7e0db; /* secondary surface / bar tracks */
-  --ink: #16303d; /* primary text, Japanese Indigo (near-black, blue soul) */
-  --ink-soft: #757575; /* secondary text and labels, Mid Grey */
-  --accent: #3f5a66; /* the one accent, Steel Teal (active states, progress) */
-  --accent-bright: #517380; /* lighter Steel Teal for hover/emphasis */
-  --alert: #b4533f; /* warm rust for overspend/negative (doesn't fight teal) */
-  --dark: #16303d; /* deep indigo blocks and icon tiles */
-  --on-dark: #f2edea; /* Star Dust text on dark/indigo surfaces */
+  --canvas: #16181d; /* near-black charcoal page */
+  --panel: #1e2128; /* barely-raised cards */
+  --hairline: #2c303a; /* dividers, gauge tracks */
+  --ink: #f2f0e9; /* warm off-white text/numerals */
+  --ink-dim: #8a8f9c; /* labels, captions */
+  --pace-good: #5bd6c0; /* on/ahead of pace (teal) */
+  --pace-warn: #e0a33e; /* drifting (amber) */
+  --pace-over: #e0653e; /* meaningfully over (ember) */
 }
 
-/* Expose tokens + fonts to Tailwind v4 utilities (bg-bg, text-ink, font-display, ...). */
 @theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
+  --color-canvas: var(--canvas);
+  --color-panel: var(--panel);
+  --color-hairline: var(--hairline);
   --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-accent: var(--accent);
-  --color-accent-bright: var(--accent-bright);
-  --color-alert: var(--alert);
-  --color-dark: var(--dark);
-  --color-on-dark: var(--on-dark);
+  --color-ink-dim: var(--ink-dim);
+  --color-pace-good: var(--pace-good);
+  --color-pace-warn: var(--pace-warn);
+  --color-pace-over: var(--pace-over);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-space-grotesk);
+  --font-display: var(--font-geist-mono);
 
-  /* Phone-like centered column on wider screens. */
   --container-app: 480px;
 }
 
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
 }
 
-/* Small uppercase labels with wide letter-spacing (recurring pattern). */
+/* Instrument-marking labels. */
 .label-caps {
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-size: 0.6875rem;
-  color: var(--ink-soft);
+  color: var(--ink-dim);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Thin vertical line "ticks" decorative motif behind budget figures. */
-.tick-motif {
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--ink-soft) 0,
-    var(--ink-soft) 1px,
-    transparent 1px,
-    transparent 8px
-  );
-  opacity: 0.18;
+/* Glide Path primitive styling. The hue is supplied inline via --pace-hue. */
+.glide-track {
+  position: relative;
+  height: 2px;
+  background: var(--hairline);
+  border-radius: 9999px;
+}
+.glide-tick {
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 10px;
+  background: var(--ink-dim);
+}
+.glide-dot {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  background: var(--pace-hue, var(--pace-good));
+  transition: left 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pace-hue, var(--pace-good)) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glide-dot {
+    transition: none;
+  }
 }
