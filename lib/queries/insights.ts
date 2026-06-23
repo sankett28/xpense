@@ -35,15 +35,24 @@ export async function getInsights(): Promise<InsightsResult> {
     .lt("spent_at", cycle.end);
   if (error) throw error;
 
+  // Committed: full monthly amount of active recurring expenses (reserved upfront).
+  const { data: recRows, error: rErr } = await supabase
+    .from("recurring_expenses")
+    .select("amount")
+    .eq("is_active", true);
+  if (rErr) throw rErr;
+  const committed = (recRows ?? []).reduce((s, r) => s + Number((r as { amount: number }).amount), 0);
+
   const salary = plan ? Number(plan.salary) : 0;
   const buffer = plan ? Number(plan.buffer) : 0;
   const allocated = plan ? plan.allowances.reduce((s, a) => s + Number(a.amount), 0) : 0;
   const goal = salary - allocated - buffer;
 
+  // Only discretionary rows (recurring_id IS NULL) count against saved totals.
   const inWindow = (start: string, end: string) =>
     (rows ?? []).filter((r) => {
       const d = String((r as { spent_at: string }).spent_at).slice(0, 10);
-      return d >= start && d < end;
+      return d >= start && d < end && (r as { recurring_id: string | null }).recurring_id == null;
     });
 
   const thisSpend = inWindow(cycle.start, cycle.end).reduce(
@@ -55,8 +64,8 @@ export async function getInsights(): Promise<InsightsResult> {
     0,
   );
 
-  const savedThisCycle = salary - thisSpend;
-  const savedLastCycle = plan ? salary - prevSpend : null;
+  const savedThisCycle = salary - thisSpend - committed - buffer;
+  const savedLastCycle = plan ? salary - prevSpend - committed - buffer : null;
 
   // Patterns over the current cycle's rows, tagged with cycle_start.
   const patternRows = inWindow(cycle.start, cycle.end).map((r) => ({

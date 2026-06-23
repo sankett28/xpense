@@ -24,7 +24,6 @@ function revalidateSpendSurfaces() {
   revalidatePath("/dashboard");
   revalidatePath("/reports");
   revalidatePath("/history");
-  revalidatePath("/categories");
 }
 
 // Edit an existing expense (amount, category, name/note, date).

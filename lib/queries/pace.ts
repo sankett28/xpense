@@ -32,14 +32,6 @@ export async function getCyclePace(): Promise<CyclePace | null> {
     .lt("spent_at", cycle.end);
   if (dErr) throw dErr;
 
-  // All spend (for per-category totals).
-  const { data: allRows, error: aErr } = await supabase
-    .from("transactions")
-    .select("amount, category_id")
-    .gte("spent_at", cycle.start)
-    .lt("spent_at", cycle.end);
-  if (aErr) throw aErr;
-
   // Committed: full monthly amount of active recurring expenses (reserved upfront).
   const { data: recRows, error: rErr } = await supabase
     .from("recurring_expenses")
@@ -56,7 +48,7 @@ export async function getCyclePace(): Promise<CyclePace | null> {
     .reduce((s, r) => s + Number((r as { amount: number }).amount), 0);
 
   const perCat: Record<string, number> = {};
-  for (const r of allRows ?? []) {
+  for (const r of discRows ?? []) {
     const id = (r as { category_id: string }).category_id;
     perCat[id] = (perCat[id] ?? 0) + Number((r as { amount: number }).amount);
   }
