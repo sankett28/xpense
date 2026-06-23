@@ -76,6 +76,20 @@ export interface Transaction {
   amount: number;
   note: string | null;
   spent_at: string; // timestamptz
+  recurring_id: string | null;
+  created_at: string;
+}
+
+export interface RecurringExpense {
+  id: string;
+  user_id: string;
+  category_id: string;
+  name: string;
+  amount: number;
+  day_of_month: number;
+  start_date: string; // YYYY-MM-DD
+  end_date: string | null; // null = forever
+  is_active: boolean;
   created_at: string;
 }
 
