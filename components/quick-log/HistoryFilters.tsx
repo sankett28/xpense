@@ -98,7 +98,7 @@ function Chip({
       onClick={onClick}
       className={[
         "shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors",
-        active ? "bg-ink text-on-dark" : "bg-surface text-ink-soft hover:text-ink",
+        active ? "bg-pace-good text-canvas" : "bg-surface text-ink hover:bg-surface-2/70",
       ].join(" ")}
     >
       {label}

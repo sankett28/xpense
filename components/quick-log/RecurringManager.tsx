@@ -238,8 +238,8 @@ function RecurringForm({
                 className={[
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   c.id === categoryId
-                    ? "bg-ink text-on-dark"
-                    : "bg-surface-2 text-ink-soft hover:text-ink",
+                    ? "bg-pace-good text-canvas"
+                    : "bg-surface-2 text-ink hover:bg-surface-2/70",
                 ].join(" ")}
               >
                 {c.name}
@@ -248,25 +248,25 @@ function RecurringForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 items-start gap-3">
           {!existing && (
-            <div>
-              <label className="label-caps">Starts</label>
+            <div className="flex flex-col">
+              <label className="label-caps min-h-[2.2em] leading-tight">Starts</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1.5 w-full rounded-xl bg-surface-2 px-3 py-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
+                className="mt-1.5 h-12 w-full appearance-none rounded-xl bg-surface-2 px-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
               />
             </div>
           )}
-          <div className={existing ? "col-span-2" : ""}>
-            <label className="label-caps">Until (blank = forever)</label>
+          <div className={`flex flex-col ${existing ? "col-span-2" : ""}`}>
+            <label className="label-caps min-h-[2.2em] leading-tight">Until (blank = forever)</label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="mt-1.5 w-full rounded-xl bg-surface-2 px-3 py-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
+              className="mt-1.5 h-12 w-full appearance-none rounded-xl bg-surface-2 px-3 text-ink outline-none focus:ring-2 focus:ring-accent/40"
             />
           </div>
         </div>

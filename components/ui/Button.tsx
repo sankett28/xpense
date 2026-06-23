@@ -4,7 +4,7 @@ type Variant = "primary" | "dark" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-accent text-on-dark hover:brightness-110 active:brightness-95",
+  primary: "bg-accent text-canvas hover:brightness-110 active:brightness-95",
   dark: "bg-dark text-on-dark hover:brightness-110 active:brightness-95",
   ghost:
     "bg-transparent text-ink border border-ink-soft/30 hover:bg-surface-2/60 active:bg-surface-2",

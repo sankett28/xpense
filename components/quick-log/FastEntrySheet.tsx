@@ -135,8 +135,8 @@ function FastEntryForm({ target, categories, onClose }: FastEntryFormProps) {
                 className={[
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   active
-                    ? "bg-ink text-on-dark"
-                    : "bg-surface-2 text-ink-soft hover:text-ink",
+                    ? "bg-pace-good text-canvas"
+                    : "bg-surface-2 text-ink hover:bg-surface-2/70",
                 ].join(" ")}
               >
                 {c.name}
@@ -150,8 +150,8 @@ function FastEntryForm({ target, categories, onClose }: FastEntryFormProps) {
             className={[
               "flex items-center gap-1 rounded-full px-4 py-2 text-sm transition-colors",
               creatingCategory
-                ? "bg-accent text-on-dark"
-                : "bg-surface-2 text-ink-soft hover:text-ink",
+                ? "bg-pace-good text-canvas"
+                : "bg-surface-2 text-ink hover:bg-surface-2/70",
             ].join(" ")}
           >
             <Plus size={14} /> New
@@ -181,7 +181,7 @@ function FastEntryForm({ target, categories, onClose }: FastEntryFormProps) {
             className={[
               "grid h-6 w-6 place-items-center rounded-md border transition-colors",
               saveAsFrequent
-                ? "border-accent bg-accent text-on-dark"
+                ? "border-pace-good bg-pace-good text-canvas"
                 : "border-ink-soft/40 text-transparent",
             ].join(" ")}
           >

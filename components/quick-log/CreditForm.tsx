@@ -73,9 +73,9 @@ export function CreditForm() {
                     "rounded-full px-3 py-1.5 text-sm capitalize",
                     active
                       ? k === "salary"
-                        ? "bg-accent text-ink"
+                        ? "bg-accent text-canvas"
                         : "bg-dark text-on-dark"
-                      : "bg-surface-2 text-ink-soft",
+                      : "bg-surface-2 text-ink",
                   ].join(" ")}
                 >
                   {k}

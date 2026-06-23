@@ -138,8 +138,8 @@ function EditForm({
                 className={[
                   "rounded-full px-4 py-2 text-sm transition-colors",
                   active
-                    ? "bg-ink text-on-dark"
-                    : "bg-surface-2 text-ink-soft hover:text-ink",
+                    ? "bg-pace-good text-canvas"
+                    : "bg-surface-2 text-ink hover:bg-surface-2/70",
                 ].join(" ")}
               >
                 {c.name}
