@@ -56,18 +56,20 @@ export async function startTrip(input: {
 // End the trip: mark inactive, and stamp end_date with today when it was blank
 // so history shows a real range.
 export async function endTrip(id: string): Promise<void> {
-  const supabase = await createClient();
+  const { supabase, userId } = await userIdOrThrow();
   const { data: trip, error: gErr } = await supabase
     .from("trips")
     .select("end_date")
     .eq("id", id)
+    .eq("user_id", userId)
     .maybeSingle();
   if (gErr) throw gErr;
   const endDate = (trip as { end_date: string | null } | null)?.end_date ?? todayISO();
   const { error } = await supabase
     .from("trips")
     .update({ is_active: false, end_date: endDate })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", userId);
   if (error) throw error;
 }
 
