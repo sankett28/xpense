@@ -230,13 +230,13 @@ export function PlanEditor({
         <span className="text-ink">{over ? "You're over by" : "You'll save"}</span>
         <span
           className="tabular-nums text-2xl font-light"
-          style={{ color: over ? paceHue(1.4) : "var(--color-pace-good)" }}
+          style={{ color: over ? paceHue(1.4) : paceHue(0) }}
         >
           {formatINR(Math.abs(savings))}
         </span>
       </div>
       {/* Glide-style savings bar. */}
-      <div className="glide-track mt-3" style={{ ["--pace-hue" as string]: over ? paceHue(1.4) : "var(--color-pace-good)" }}>
+      <div className="glide-track mt-3" style={{ ["--pace-hue" as string]: over ? paceHue(1.4) : paceHue(0) }}>
         <span
           className="glide-dot"
           style={{ left: `${over ? 8 : dotPercent(fillRatio * 2)}%` }}
