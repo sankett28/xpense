@@ -49,10 +49,10 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full max-w-[var(--container-app)] mx-auto">
         {/* Frosted-glass card: ~12% translucent fill + backdrop blur. */}
-        <div className="rounded-3xl border border-ink/15 bg-ink/[0.12] p-8 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-3xl border border-ink/15 bg-ink/[0.12] p-8 shadow-2xl backdrop-blur-sm">
           <header className="mb-8">
             <span className="block font-display text-2xl font-medium text-ink/70">
-              Sign in to
+              Welcome to
             </span>
             <h1 className="font-display text-5xl font-bold tracking-tight text-ink">
               {APP_NAME}
@@ -102,7 +102,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full rounded-xl bg-pace-good px-4 py-3 font-medium text-canvas transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-gray-300 px-4 py-3 font-medium text-canvas transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? "Signing in…" : "Sign in"}
             </button>
@@ -110,7 +110,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-ink/70">
-          Access is provided by your administrator.
+          Contact Pablo for access.
         </p>
       </div>
     </main>
