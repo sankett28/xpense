@@ -6,13 +6,10 @@ import { StartTripGate } from "@/components/vacation/StartTripGate";
 
 // /vacation: shows the active trip, or a prompt to start one.
 export default async function VacationPage() {
-  const [trip, items, categories] = await Promise.all([
-    getActiveTripWithSpend(),
-    listItems(),
-    listCategories(),
-  ]);
-
+  const trip = await getActiveTripWithSpend();
   if (!trip) return <StartTripGate />;
+
+  const [items, categories] = await Promise.all([listItems(), listCategories()]);
 
   return <TripView trip={trip} categories={categories} recentItems={items.slice(0, 6)} />;
 }
