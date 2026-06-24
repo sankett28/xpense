@@ -7,6 +7,7 @@ export interface AddTransactionInput {
   amount: number;
   note?: string | null;
   spent_at?: string; // timestamptz; defaults to now() in the DB
+  trip_id?: string | null;
 }
 
 // Most recent transactions, newest first.
@@ -132,6 +133,8 @@ export async function addTransaction(
     category_id: input.category_id,
     amount: input.amount,
     note: input.note ?? null,
+    recurring_id: null,
+    trip_id: input.trip_id ?? null,
   };
   // Only send spent_at when provided so the DB default (now()) applies otherwise.
   if (input.spent_at) row.spent_at = input.spent_at;
