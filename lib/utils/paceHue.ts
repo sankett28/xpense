@@ -25,6 +25,13 @@ export function verdictLabel(verdict: PaceVerdict): string {
   return "ON PACE";
 }
 
+// Home-hero verdict label, in plain "will I save?" language. When spending is
+// on pace or below, the user is on track to save; only an over-pace projection
+// reads as overspending.
+export function savingsVerdictLabel(verdict: PaceVerdict): string {
+  return verdict === "over" ? "OVERSPENDING" : "ON TRACK TO SAVE";
+}
+
 // Track position (0..100%) for the user's dot; 1.0 sits at the centered tick.
 export function dotPercent(ratio: number): number {
   const clamped = Math.min(Math.max(ratio, 0), 2);
