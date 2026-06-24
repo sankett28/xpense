@@ -31,6 +31,7 @@ export async function getInsights(): Promise<InsightsResult> {
   const { data: rows, error } = await supabase
     .from("transactions")
     .select("amount, spent_at, recurring_id")
+    .is("trip_id", null)
     .gte("spent_at", prev.start)
     .lt("spent_at", cycle.end);
   if (error) throw error;
