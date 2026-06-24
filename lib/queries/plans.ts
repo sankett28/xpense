@@ -125,3 +125,71 @@ async function getActivePlanById(planId: string): Promise<PlanWithAllowances> {
   if (aErr) throw aErr;
   return { ...(plan as Plan), allowances: (rows ?? []) as PlanWithAllowances["allowances"] };
 }
+
+// Fetch any plan by id with its allowances joined to categories. Null if absent.
+export async function getPlanById(id: string): Promise<PlanWithAllowances | null> {
+  const supabase = await createClient();
+  const { data: plan, error } = await supabase
+    .from("plans")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!plan) return null;
+  const { data: rows, error: aErr } = await supabase
+    .from("plan_allowances")
+    .select("*, category:categories(*)")
+    .eq("plan_id", id);
+  if (aErr) throw aErr;
+  return { ...(plan as Plan), allowances: (rows ?? []) as PlanWithAllowances["allowances"] };
+}
+
+// Delete a plan. Refuses to delete the active plan (it's live).
+export async function deletePlan(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: plan, error: gErr } = await supabase
+    .from("plans")
+    .select("is_active")
+    .eq("id", id)
+    .maybeSingle();
+  if (gErr) throw gErr;
+  if (!plan) return;
+  if ((plan as { is_active: boolean }).is_active) {
+    throw new Error("Can't delete the active plan. Activate another plan first.");
+  }
+  const { error } = await supabase.from("plans").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// Clone a plan (and its allowances) as a new inactive plan named "<name> copy".
+export async function duplicatePlan(id: string): Promise<Plan> {
+  const { supabase, userId } = await userIdOrThrow();
+  const source = await getPlanById(id);
+  if (!source) throw new Error("Plan not found");
+
+  const { data: created, error } = await supabase
+    .from("plans")
+    .insert({
+      user_id: userId,
+      name: `${source.name} copy`,
+      salary: source.salary,
+      buffer: source.buffer,
+      is_active: false,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  const newPlan = created as Plan;
+
+  if (source.allowances.length) {
+    const { error: insErr } = await supabase.from("plan_allowances").insert(
+      source.allowances.map((a) => ({
+        plan_id: newPlan.id,
+        category_id: a.category_id,
+        amount: a.amount,
+      })),
+    );
+    if (insErr) throw insErr;
+  }
+  return newPlan;
+}
