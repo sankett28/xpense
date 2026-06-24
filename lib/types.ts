@@ -77,6 +77,7 @@ export interface Transaction {
   note: string | null;
   spent_at: string; // timestamptz
   recurring_id: string | null;
+  trip_id: string | null;
   created_at: string;
 }
 
@@ -188,4 +189,28 @@ export interface Insight {
   kind: InsightKind;
   headline: string; // "You overspend most on weekends"
   detail: string; // "Sat–Sun avg ₹1,400/day vs ₹620 weekdays"
+}
+
+// --- Vacation mode ---
+
+export interface Trip {
+  id: string;
+  user_id: string;
+  name: string;
+  start_date: string | null; // YYYY-MM-DD
+  end_date: string | null; // YYYY-MM-DD
+  is_active: boolean;
+  created_at: string;
+}
+
+// Active trip with its running spend total and per-category breakdown.
+export interface TripWithSpend extends Trip {
+  total: number;
+  byCategory: Array<{
+    categoryId: string;
+    name: string;
+    icon: string | null;
+    spent: number;
+  }>;
+  dayNumber: number; // 1-based days since start_date (or created_at), min 1
 }

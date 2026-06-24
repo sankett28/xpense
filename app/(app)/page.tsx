@@ -3,14 +3,24 @@ import { listItems } from "@/lib/queries/items";
 import { listCategories } from "@/lib/queries/categories";
 import { getGreetingName } from "@/lib/queries/profile";
 import { runMaterialize } from "@/lib/queries/recurring";
+import { getActiveTripWithSpend } from "@/lib/queries/trips";
 import { PaceHeadline } from "@/components/ui/PaceHeadline";
 import { HomeLogger } from "@/components/quick-log/HomeLogger";
+import { TripView } from "@/components/vacation/TripView";
 import { formatINR } from "@/lib/utils/currency";
 
 // Home: are you on pace to land safe? The PaceHeadline answers it; today /
 // to-date / safe-to-spend sit beneath; the + logging hero is unchanged.
 export default async function HomePage() {
   await runMaterialize();
+
+  const activeTrip = await getActiveTripWithSpend();
+  if (activeTrip) {
+    const [items, categories] = await Promise.all([listItems(), listCategories()]);
+    return (
+      <TripView trip={activeTrip} categories={categories} recentItems={items.slice(0, 6)} />
+    );
+  }
 
   const [name, paceData, items, categories] = await Promise.all([
     getGreetingName(),

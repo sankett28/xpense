@@ -1,12 +1,14 @@
 import { getInsights } from "@/lib/queries/insights";
 import { getCyclePace } from "@/lib/queries/pace";
+import { getActiveTrip } from "@/lib/queries/trips";
+import { TripNotice } from "@/components/vacation/TripNotice";
 import { formatINR } from "@/lib/utils/currency";
 import type { Insight } from "@/lib/types";
 
 // Reports: progress (are you improving?), plain-language patterns, and where the
 // money went. Insights only appear with enough data.
 export default async function ReportsPage() {
-  const [insightsData, paceData] = await Promise.all([getInsights(), getCyclePace()]);
+  const [insightsData, paceData, activeTrip] = await Promise.all([getInsights(), getCyclePace(), getActiveTrip()]);
   const { insights, savedThisCycle, savedLastCycle, streak } = insightsData;
 
   const delta = savedLastCycle != null ? savedThisCycle - savedLastCycle : null;
@@ -15,6 +17,7 @@ export default async function ReportsPage() {
 
   return (
     <div className="pt-8">
+      {activeTrip ? <TripNotice name={activeTrip.name} /> : null}
       <p className="label-caps">Your insights</p>
 
       <p className="label-caps mt-6">Progress</p>

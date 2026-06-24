@@ -1,7 +1,9 @@
 import { getCyclePace } from "@/lib/queries/pace";
 import { listRecentTransactions } from "@/lib/queries/transactions";
+import { getActiveTrip } from "@/lib/queries/trips";
 import { PaceHeadline } from "@/components/ui/PaceHeadline";
 import { GlidePath } from "@/components/ui/GlidePath";
+import { TripNotice } from "@/components/vacation/TripNotice";
 import { verdictLabel } from "@/lib/utils/paceHue";
 import { formatINR } from "@/lib/utils/currency";
 import { formatTime } from "@/lib/utils/date";
@@ -10,8 +12,11 @@ import type { CategoryPace } from "@/lib/types";
 // Dashboard: where is it leaking? Roll-up pace at the top, then per-category
 // pace (over-trending first), then recent spend.
 export default async function DashboardPage() {
-  const paceData = await getCyclePace();
-  const recent = await listRecentTransactions(6);
+  const [paceData, recent, activeTrip] = await Promise.all([
+    getCyclePace(),
+    listRecentTransactions(6),
+    getActiveTrip(),
+  ]);
 
   if (!paceData?.plan) {
     return (
@@ -25,6 +30,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="pt-8">
+      {activeTrip ? <TripNotice name={activeTrip.name} /> : null}
       <p className="label-caps">
         This cycle · Day {cycle.daysElapsed} of {cycle.daysInCycle}
       </p>

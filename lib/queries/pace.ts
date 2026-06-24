@@ -28,6 +28,7 @@ export async function getCyclePace(): Promise<CyclePace | null> {
     .from("transactions")
     .select("amount, category_id, spent_at")
     .is("recurring_id", null)
+    .is("trip_id", null)
     .gte("spent_at", cycle.start)
     .lt("spent_at", cycle.end);
   if (dErr) throw dErr;
