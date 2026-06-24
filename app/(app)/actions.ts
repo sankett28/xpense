@@ -14,7 +14,8 @@ import {
   updateRecurring,
   deleteRecurring,
 } from "@/lib/queries/recurring";
-import { savePlan, activatePlan, ensureDefaultPlan } from "@/lib/queries/plans";
+import { savePlan, activatePlan, ensureDefaultPlan, deletePlan, duplicatePlan } from "@/lib/queries/plans";
+import { startTrip, endTrip, getActiveTrip } from "@/lib/queries/trips";
 import { setCycleResetDayValue } from "@/lib/queries/profile";
 import type { CreditKind } from "@/lib/types";
 
@@ -164,15 +165,23 @@ export async function logEntry(input: {
     itemId = item.id;
   }
 
+  const activeTrip = await getActiveTrip();
+
   await addTransaction({
     item_id: itemId,
     category_id: categoryId,
     amount,
     note: name + (input.note?.trim() ? ` · ${input.note.trim()}` : ""),
+    trip_id: activeTrip ? activeTrip.id : null,
   });
 
-  revalidatePath("/");
-  revalidatePath("/dashboard");
+  if (activeTrip) {
+    revalidatePath("/");
+    revalidatePath("/vacation");
+  } else {
+    revalidatePath("/");
+    revalidatePath("/dashboard");
+  }
 }
 
 // Log an expense from the quick-log fast-entry sheet. The DB trigger bumps the
@@ -256,6 +265,13 @@ function revalidatePlanSurfaces() {
   revalidatePath("/plan");
   revalidatePath("/dashboard");
   revalidatePath("/reports");
+  revalidatePath("/vacation");
+}
+
+function revalidateTripSurfaces() {
+  revalidatePath("/");
+  revalidatePath("/vacation");
+  revalidatePath("/history");
 }
 
 export async function savePlanAction(input: {
@@ -311,4 +327,39 @@ export async function createCategoryAction(input: {
   const category = await addCategory({ name });
   revalidatePlanSurfaces();
   return { id: category.id, name: category.name };
+}
+
+export async function deletePlanAction(planId: string) {
+  if (!planId) throw new Error("Missing plan id");
+  await deletePlan(planId);
+  revalidatePlanSurfaces();
+}
+
+export async function duplicatePlanAction(planId: string): Promise<{ id: string }> {
+  if (!planId) throw new Error("Missing plan id");
+  const plan = await duplicatePlan(planId);
+  revalidatePlanSurfaces();
+  return { id: plan.id };
+}
+
+export async function startTripAction(input: {
+  name: string;
+  startDate?: string | null;
+  endDate?: string | null;
+}): Promise<{ id: string }> {
+  const name = (input.name ?? "").trim();
+  if (!name) throw new Error("Name your trip");
+  const trip = await startTrip({
+    name,
+    startDate: input.startDate?.trim() ? input.startDate : null,
+    endDate: input.endDate?.trim() ? input.endDate : null,
+  });
+  revalidateTripSurfaces();
+  return { id: trip.id };
+}
+
+export async function endTripAction(tripId: string) {
+  if (!tripId) throw new Error("Missing trip id");
+  await endTrip(tripId);
+  revalidateTripSurfaces();
 }
