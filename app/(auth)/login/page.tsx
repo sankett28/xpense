@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { APP_NAME } from "@/lib/config";
+import FaultyTerminal from "@/components/ui/FaultyTerminal";
 import { signIn, type SignInState } from "./actions";
 
 const initialState: SignInState = {};
@@ -22,11 +23,35 @@ export default function LoginPage() {
   }, [state.ok, router]);
 
   return (
-    <main className="flex min-h-full flex-1 items-center justify-center px-6 py-12">
-      <div className="w-full max-w-[var(--container-app)] mx-auto">
-        <div className="rounded-3xl bg-surface p-8 shadow-sm">
+    <main className="relative flex min-h-full flex-1 items-center justify-center overflow-hidden px-6 py-12">
+      {/* Animated terminal background. */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-canvas">
+        <FaultyTerminal
+          scale={1.6}
+          gridMul={[2, 1]}
+          digitSize={1.2}
+          timeScale={0.6}
+          scanlineIntensity={0.6}
+          glitchAmount={1}
+          flickerAmount={0.8}
+          noiseAmp={1}
+          curvature={0.1}
+          tint="#5bd6c0"
+          mouseReact
+          mouseStrength={0.4}
+          pageLoadAnimation
+          brightness={0.55}
+          className="!pointer-events-auto h-full w-full opacity-70"
+        />
+        {/* Darkening veil so foreground text stays legible over the animation. */}
+        <div className="absolute inset-0 bg-canvas/40" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[var(--container-app)] mx-auto">
+        {/* Frosted-glass card: ~12% translucent fill + backdrop blur. */}
+        <div className="rounded-3xl border border-ink/15 bg-ink/[0.12] p-8 shadow-2xl backdrop-blur-xl">
           <header className="mb-8">
-            <span className="block font-display text-2xl font-medium text-ink-soft">
+            <span className="block font-display text-2xl font-medium text-ink/70">
               Sign in to
             </span>
             <h1 className="font-display text-5xl font-bold tracking-tight text-ink">
@@ -45,7 +70,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-ink/10 bg-bg px-4 py-3 text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40"
+                className="w-full rounded-xl border border-ink/15 bg-canvas/40 px-4 py-3 text-ink outline-none transition focus:border-pace-good focus:ring-2 focus:ring-pace-good/40"
                 placeholder="you@example.com"
               />
             </div>
@@ -60,7 +85,7 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-xl border border-ink/10 bg-bg px-4 py-3 text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40"
+                className="w-full rounded-xl border border-ink/15 bg-canvas/40 px-4 py-3 text-ink outline-none transition focus:border-pace-good focus:ring-2 focus:ring-pace-good/40"
                 placeholder="••••••••"
               />
             </div>
@@ -77,14 +102,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full rounded-xl bg-accent px-4 py-3 font-medium text-ink transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-pace-good px-4 py-3 font-medium text-canvas transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? "Signing in…" : "Sign in"}
             </button>
           </form>
         </div>
 
-        <p className="mt-6 text-center text-xs text-ink-soft">
+        <p className="mt-6 text-center text-xs text-ink/70">
           Access is provided by your administrator.
         </p>
       </div>
