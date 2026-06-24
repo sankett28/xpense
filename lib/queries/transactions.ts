@@ -16,6 +16,7 @@ export async function listRecentTransactions(limit = 20): Promise<Transaction[]>
   const { data, error } = await supabase
     .from("transactions")
     .select("*")
+    .is("trip_id", null)
     .order("spent_at", { ascending: false })
     .limit(limit);
 
@@ -46,6 +47,7 @@ export async function listTransactions(
   let query = supabase
     .from("transactions")
     .select("*", { count: "exact" })
+    .is("trip_id", null)
     .order("spent_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
