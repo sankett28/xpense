@@ -64,6 +64,21 @@ export function resolveCurrentCycle(
   return null;
 }
 
+// The previous salary cycle's half-open [start, end) window — from the row
+// immediately before `current` up to `current`'s start. Null when there is no
+// prior salary cycle (or no current cycle at all). Used by insights for the
+// "vs last cycle" comparison.
+export function previousSalaryWindow(
+  rows: BudgetCycleRow[],
+  current: ResolvedCycle | null,
+): { start: string; end: string } | null {
+  if (!current) return null;
+  const sorted = sortRows(rows);
+  const idx = sorted.findIndex((r) => r.salary_credit_id === current.salaryCreditId);
+  if (idx <= 0) return null;
+  return { start: sorted[idx - 1].cycle_start, end: current.start };
+}
+
 // Resolve which cycle a given YYYY-MM-DD date falls into. Uses `today` only to
 // coalesce the open cycle's end. Returns null if the date precedes all cycles.
 export function resolveCycleForDate(

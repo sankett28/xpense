@@ -2,30 +2,16 @@ import { createClient } from "@/lib/supabase/server";
 import { getActivePlan } from "@/lib/queries/plans";
 import { getCycleResetDay } from "@/lib/queries/profile";
 import { getBudgetCycleRows } from "@/lib/queries/cycles";
-import { resolveCurrentCycle } from "@/lib/utils/cycle";
+import { resolveCurrentCycle, previousSalaryWindow } from "@/lib/utils/cycle";
 import { resolveEffectiveCycle, computeInsights, computeStreak } from "@/lib/pace";
 import { todayISO } from "@/lib/utils/date";
-import type { Insight, BudgetCycleRow, ResolvedCycle } from "@/lib/types";
+import type { Insight } from "@/lib/types";
 
 export interface InsightsResult {
   insights: Insight[];
   savedThisCycle: number;
   savedLastCycle: number | null;
   streak: number;
-}
-
-// The previous salary cycle's half-open [start, end) window — from the row
-// immediately before the current one up to the current cycle's start. Null when
-// there is no prior salary cycle (or no salary at all).
-function previousSalaryWindow(
-  rows: BudgetCycleRow[],
-  current: ResolvedCycle | null,
-): { start: string; end: string } | null {
-  if (!current) return null;
-  const sorted = [...rows].sort((a, b) => (a.cycle_start < b.cycle_start ? -1 : 1));
-  const idx = sorted.findIndex((r) => r.salary_credit_id === current.salaryCreditId);
-  if (idx <= 0) return null;
-  return { start: sorted[idx - 1].cycle_start, end: current.start };
 }
 
 export async function getInsights(): Promise<InsightsResult> {

@@ -54,6 +54,23 @@ describe("resolveEffectiveCycle", () => {
     expect(c.daysRemaining).toBe(0);
   });
 
+  it("today exactly on the expected payday is not yet overdue", () => {
+    // expectedEnd is exclusive (next cycle's start), so today == expectedEnd
+    // means the new salary is due today but the old cycle still owns the day.
+    const c = resolveEffectiveCycle("2026-05-25", 25, "2026-06-25");
+    expect(c.expectedEnd).toBe("2026-06-25");
+    expect(c.overdue).toBe(false);
+    expect(c.end).toBe("2026-06-25");
+  });
+
+  it("one day past the expected payday flips to overdue", () => {
+    const c = resolveEffectiveCycle("2026-05-25", 25, "2026-06-26");
+    expect(c.overdue).toBe(true);
+    expect(c.end).toBe("2026-06-27"); // today + 1
+    expect(c.daysInCycle).toBe(31); // denominator unchanged by the extension
+    expect(c.daysRemaining).toBe(0);
+  });
+
   it("reset day clamps in short months", () => {
     const c = resolveEffectiveCycle("2026-01-31", 31, "2026-02-10");
     expect(c.expectedEnd).toBe("2026-02-28"); // Feb clamps 31 -> 28
