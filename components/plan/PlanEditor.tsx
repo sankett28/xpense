@@ -140,7 +140,7 @@ export function PlanEditor({
         />
       </label>
       <label className="mt-3 flex items-center justify-between">
-        <span className="text-ink">Cycle resets on day</span>
+        <span className="text-ink">Expected payday (day of month)</span>
         <input
           type="number"
           inputMode="numeric"
@@ -148,10 +148,13 @@ export function PlanEditor({
           max={31}
           value={day}
           onChange={(e) => setDay(Math.min(31, Math.max(1, Number(e.target.value) || 1)))}
-          aria-label="Cycle reset day of month"
+          aria-label="Expected payday day of month"
           className={`w-20 ${inputCls}`}
         />
       </label>
+      <p className="mt-1 text-xs text-ink-dim">
+        Cycles start on the day your salary actually lands — this is just when we expect it.
+      </p>
 
       <p className="label-caps mt-8">Allowances</p>
       <div>

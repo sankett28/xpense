@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AVAILABLE_FROM_SALARY_ONLY } from "@/lib/config";
 import type { BudgetCycleRow, ResolvedCycle } from "@/lib/types";
 import { resolveCurrentCycle } from "@/lib/utils/cycle";
+import { addDays } from "@/lib/utils/date";
 
 export interface CycleTotals {
   totalCredited: number;
@@ -97,15 +98,4 @@ export async function getSpendByCategory(
 function sumAmounts(rows: { amount: number }[] | null): number {
   if (!rows) return 0;
   return rows.reduce((acc, r) => acc + Number(r.amount), 0);
-}
-
-// Add `n` days to a YYYY-MM-DD string, returning YYYY-MM-DD.
-function addDays(iso: string, n: number): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const date = new Date(Date.UTC(y, (m ?? 1) - 1, d ?? 1));
-  date.setUTCDate(date.getUTCDate() + n);
-  const yy = date.getUTCFullYear();
-  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(date.getUTCDate()).padStart(2, "0");
-  return `${yy}-${mm}-${dd}`;
 }

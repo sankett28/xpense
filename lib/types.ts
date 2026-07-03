@@ -149,6 +149,15 @@ export interface CalendarCycle {
   daysRemaining: number; // daysInCycle - daysElapsed, clamped >= 0
 }
 
+// A CalendarCycle re-anchored to the actual salary credit date. `start` is the
+// real credit date; `expectedEnd` is the expected next payday (from the reset
+// day) used as the projection denominator. `overdue` is true when today is past
+// `expectedEnd` with no newer salary logged — the cycle is running long.
+export interface EffectiveCycle extends CalendarCycle {
+  expectedEnd: string; // YYYY-MM-DD — expected next payday
+  overdue: boolean;
+}
+
 // Everything the pure pace math needs. No Supabase, no Date.now inside.
 export interface PaceInputs {
   salary: number;

@@ -6,7 +6,7 @@ import { GlidePath } from "@/components/ui/GlidePath";
 import { TripNotice } from "@/components/vacation/TripNotice";
 import { verdictLabel } from "@/lib/utils/paceHue";
 import { formatINR } from "@/lib/utils/currency";
-import { formatTime } from "@/lib/utils/date";
+import { formatDate, formatTime } from "@/lib/utils/date";
 import type { CategoryPace } from "@/lib/types";
 
 // Dashboard: where is it leaking? Roll-up pace at the top, then per-category
@@ -27,15 +27,23 @@ export default async function DashboardPage() {
   }
 
   const { cycle, pace, categories } = paceData;
+  const remaining = pace.spendable - paceData.spentSoFar;
 
   return (
     <div className="pt-8">
       {activeTrip ? <TripNotice name={activeTrip.name} /> : null}
       <p className="label-caps">
-        This cycle · Day {cycle.daysElapsed} of {cycle.daysInCycle}
+        {cycle.overdue
+          ? `Cycle extended · salary overdue since ${formatDate(cycle.expectedEnd)}`
+          : `This cycle · Day ${cycle.daysElapsed} of ${cycle.daysInCycle}`}
       </p>
 
-      <PaceHeadline pace={pace} />
+      <PaceHeadline
+        pace={pace}
+        overdue={cycle.overdue}
+        expectedEnd={cycle.expectedEnd}
+        remaining={remaining}
+      />
 
       <p className="label-caps mt-8">On pace by category</p>
       <div className="mt-2">
