@@ -1,12 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActivePlan } from "@/lib/queries/plans";
 import { getCycleResetDay } from "@/lib/queries/profile";
-import { resolveCalendarCycle, computePace, computeCategoryPace } from "@/lib/pace";
+import { getCurrentCycle } from "@/lib/queries/cycles";
+import { resolveEffectiveCycle, computePace, computeCategoryPace } from "@/lib/pace";
 import { todayISO } from "@/lib/utils/date";
-import type { CalendarCycle, CategoryPace, PaceResult, PlanWithAllowances } from "@/lib/types";
+import type { EffectiveCycle, CategoryPace, PaceResult, PlanWithAllowances } from "@/lib/types";
 
 export interface CyclePace {
-  cycle: CalendarCycle;
+  cycle: EffectiveCycle;
   pace: PaceResult;
   categories: CategoryPace[];
   spentToday: number;
@@ -19,7 +20,10 @@ export async function getCyclePace(): Promise<CyclePace | null> {
   const plan = await getActivePlan();
   const resetDay = await getCycleResetDay();
   const today = todayISO();
-  const cycle = resolveCalendarCycle(resetDay, today);
+  // Anchor the cycle to the actual salary credit date; the reset day only sets
+  // the expected next payday (projection denominator).
+  const salaryCycle = await getCurrentCycle();
+  const cycle = resolveEffectiveCycle(salaryCycle?.start ?? null, resetDay, today);
 
   const supabase = await createClient();
 

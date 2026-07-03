@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActivePlan } from "@/lib/queries/plans";
 import { getCycleResetDay } from "@/lib/queries/profile";
-import { resolveCalendarCycle, computeInsights, computeStreak } from "@/lib/pace";
-import { todayISO, toISODate } from "@/lib/utils/date";
-import type { Insight, CalendarCycle } from "@/lib/types";
+import { getBudgetCycleRows } from "@/lib/queries/cycles";
+import { resolveCurrentCycle, previousSalaryWindow } from "@/lib/utils/cycle";
+import { resolveEffectiveCycle, computeInsights, computeStreak } from "@/lib/pace";
+import { todayISO } from "@/lib/utils/date";
+import type { Insight } from "@/lib/types";
 
 export interface InsightsResult {
   insights: Insight[];
@@ -12,27 +14,25 @@ export interface InsightsResult {
   streak: number;
 }
 
-// Compute the previous cycle's [start,end) by walking the reset day back one step.
-function previousCycle(resetDay: number, current: CalendarCycle): CalendarCycle {
-  const dayBeforeStart = new Date(current.start);
-  dayBeforeStart.setDate(dayBeforeStart.getDate() - 1);
-  return resolveCalendarCycle(resetDay, toISODate(dayBeforeStart));
-}
-
 export async function getInsights(): Promise<InsightsResult> {
   const plan = await getActivePlan();
   const resetDay = await getCycleResetDay();
-  const cycle = resolveCalendarCycle(resetDay, todayISO());
-  const prev = previousCycle(resetDay, cycle);
+  const today = todayISO();
+
+  const rows = await getBudgetCycleRows();
+  const salaryCycle = resolveCurrentCycle(rows, today);
+  const cycle = resolveEffectiveCycle(salaryCycle?.start ?? null, resetDay, today);
+  const prev = previousSalaryWindow(rows, salaryCycle);
 
   const supabase = await createClient();
 
   // Pull recent transactions (this + previous cycle window) for patterns.
-  const { data: rows, error } = await supabase
+  const windowStart = prev?.start ?? cycle.start;
+  const { data: rows_tx, error } = await supabase
     .from("transactions")
     .select("amount, spent_at, recurring_id")
     .is("trip_id", null)
-    .gte("spent_at", prev.start)
+    .gte("spent_at", windowStart)
     .lt("spent_at", cycle.end);
   if (error) throw error;
 
@@ -51,7 +51,7 @@ export async function getInsights(): Promise<InsightsResult> {
 
   // Only discretionary rows (recurring_id IS NULL) count against saved totals.
   const inWindow = (start: string, end: string) =>
-    (rows ?? []).filter((r) => {
+    (rows_tx ?? []).filter((r) => {
       const d = String((r as { spent_at: string }).spent_at).slice(0, 10);
       return d >= start && d < end && (r as { recurring_id: string | null }).recurring_id == null;
     });
@@ -60,13 +60,15 @@ export async function getInsights(): Promise<InsightsResult> {
     (s, r) => s + Number((r as { amount: number }).amount),
     0,
   );
-  const prevSpend = inWindow(prev.start, prev.end).reduce(
-    (s, r) => s + Number((r as { amount: number }).amount),
-    0,
-  );
+  const prevSpend = prev
+    ? inWindow(prev.start, prev.end).reduce(
+        (s, r) => s + Number((r as { amount: number }).amount),
+        0,
+      )
+    : 0;
 
   const savedThisCycle = salary - thisSpend - committed - buffer;
-  const savedLastCycle = plan ? salary - prevSpend - committed - buffer : null;
+  const savedLastCycle = plan && prev ? salary - prevSpend - committed - buffer : null;
 
   // Patterns over the current cycle's rows, tagged with cycle_start.
   const patternRows = inWindow(cycle.start, cycle.end).map((r) => ({

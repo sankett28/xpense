@@ -47,6 +47,13 @@ export function daysBetween(a: string | Date, b: string | Date): number {
   return Math.round((ub - ua) / MS_PER_DAY);
 }
 
+// Add `n` days to a YYYY-MM-DD string, returning YYYY-MM-DD (local time).
+export function addDays(iso: string, n: number): string {
+  const d = parseISODate(iso);
+  d.setDate(d.getDate() + n);
+  return toISODate(d);
+}
+
 // "2:30 PM" — accepts a timestamp string or Date.
 export function formatTime(ts: string | Date): string {
   const date = typeof ts === "string" ? new Date(ts) : ts;
